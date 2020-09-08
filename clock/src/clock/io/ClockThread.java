@@ -1,32 +1,47 @@
 package clock.io;
-//kan förmodligen flytta in ClockInput i denna klass för att göra det enklare
+
+import java.util.concurrent.Semaphore;
+
+import clock.io.ClockInput.UserInput;
+
 
 public class ClockThread extends Thread {
 	private int h, m, s;
 	private ClockOutput out;
+	private ClockInput in;
+	public Time time = new Time(h,m,s);
+	
 
-	public ClockThread(int h, int m, int s, ClockOutput cp) {
-		this.h = h;
-		this.m = m;
-		this.s = s;
-		this.out = cp;
+	public ClockThread( ClockOutput out, ClockInput in) {
+		this.out = out;
+		this.in=in;
 	}
 
 	public void run() {
+		while(true) {
+			timeTicking();
+		
+		}
+		} 
+			
+	
 
-		timeTicking();
-
+	
+	private void updateClockWithUserInput() throws InterruptedException {
+		in.getSemaphore().acquire();
+		UserInput userInput = in.getUserInput();
+		time.getTimeFromUser(userInput);
 	}
 
-	public void timeTicking() {
+	private void timeTicking()  {
 		long t0 = System.currentTimeMillis();
 		try {
 
 			int sec = 0;
 			while (true) {
 				long now = System.currentTimeMillis();
-				increaseTime();
-				out.displayTime(h, m, s);
+				time.getCurrentTime().increaseTime();
+				out.displayTime(time.getHour(), time.getMin(), time.getSec());
 				Thread.sleep((t0 + ((sec + 1) * 1000)) - now);
 				sec++;
 			}
@@ -36,16 +51,5 @@ public class ClockThread extends Thread {
 
 	}
 
-	public void increaseTime() {
-		s++;
-		if (s > 59) {
-			m++;
-			s = 0;
-			if (m > 59) {
-				h++;
-				m = 0;
-			}
-		}
 
-	}
 }

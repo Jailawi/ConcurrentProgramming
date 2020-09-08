@@ -22,15 +22,15 @@ public class ClockMain {
         	in.getSemaphore().acquire();
             UserInput userInput = in.getUserInput();
             int choice = userInput.getChoice();
-            int h = userInput.getHours();
-            int m = userInput.getMinutes();
-            int s = userInput.getSeconds();
-            
-            ClockThread thread= new ClockThread(h,m,s,out);
+           
+            ClockThread thread= new ClockThread(out,in);
             thread.start();
-    
+            
+            if(choice == 1) {
+            thread.time.getCurrentTime().getTimeFromUser(userInput);
+            }
 
-            System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
+          //  System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
         }
     }
 }
