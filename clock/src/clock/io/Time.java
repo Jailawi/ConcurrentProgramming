@@ -43,6 +43,17 @@ public class Time {
 		mutex.release();
 	}
 
+	public boolean equals(Time clockTime) {
+		try {
+			mutex.acquire();
+			boolean b = h == clockTime.getHour() && m == clockTime.getMin() && s == clockTime.getSec();
+			mutex.release();
+			return b;
+		} catch (InterruptedException e) {
+			throw new Error(e);
+		}
+	}
+
 	public void increaseTime() throws InterruptedException {
 		mutex.acquire();
 		s++;
