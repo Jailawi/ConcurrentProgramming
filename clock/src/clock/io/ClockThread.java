@@ -25,13 +25,15 @@ public class ClockThread extends Thread {
 		} 
 			
 	
-
+/*
 	
 	private void updateClockWithUserInput() throws InterruptedException {
 		in.getSemaphore().acquire();
 		UserInput userInput = in.getUserInput();
 		time.getTimeFromUser(userInput);
 	}
+	
+	*/
 
 	private void timeTicking()  {
 		long t0 = System.currentTimeMillis();

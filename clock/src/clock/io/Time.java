@@ -31,7 +31,7 @@ public class Time {
 		return s;
 	}
 	
-	
+	/*
 	public void getTimeFromUser(UserInput userInput) throws InterruptedException {
 		mutex.acquire();
 		h= userInput.getHours();
@@ -40,7 +40,15 @@ public class Time {
 		mutex.release();
 	}
 	
+	*/
 	
+	public void parseUserInput(int h, int m, int s) throws InterruptedException {
+		mutex.acquire();
+		this.h=h;
+		this.m=m;
+		this.s=s;
+		mutex.release();
+	}
 	
 	public void increaseTime() throws InterruptedException {
 		mutex.acquire();

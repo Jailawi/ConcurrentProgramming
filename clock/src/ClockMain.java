@@ -12,8 +12,9 @@ public class ClockMain {
         ClockInput  in  = emulator.getInput();
         ClockOutput out = emulator.getOutput();
         
-      
-   
+        ClockThread thread= new ClockThread(out,in);
+        thread.start();
+
 
         
         
@@ -22,15 +23,20 @@ public class ClockMain {
         	in.getSemaphore().acquire();
             UserInput userInput = in.getUserInput();
             int choice = userInput.getChoice();
-           
-            ClockThread thread= new ClockThread(out,in);
-            thread.start();
+            int h=userInput.getHours();
+            int m = userInput.getMinutes();
+            int s= userInput.getSeconds();
             
+
+
             if(choice == 1) {
-            thread.time.getCurrentTime().getTimeFromUser(userInput);
+            thread.time.getCurrentTime().parseUserInput(h,m,s);
             }
 
+           
+            
           //  System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
         }
+
     }
 }
