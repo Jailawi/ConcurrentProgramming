@@ -72,6 +72,7 @@ public class AlarmHandler implements Runnable {
 
     @Override
     public void run() {
+
         while (true) {
             try {
                 checkAlarm();

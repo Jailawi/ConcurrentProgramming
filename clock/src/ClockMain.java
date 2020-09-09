@@ -19,7 +19,6 @@ public class ClockMain {
         Thread alarmThread = new Thread(alarmHandler);
 
         clockThread.start();
-        alarmThread.start();
 
         while (true) {
             in.getSemaphore().acquire();
@@ -34,6 +33,7 @@ public class ClockMain {
             } else if (choice == 2) {
                 alarmHandler.isAlarmOn(true);
                 alarmHandler.setAlarm(h, m, s);
+                alarmThread.start();
                 // alarmHandler.soundTheAlarm(clock.getTime().getCurrentTime());
 
             } else if (choice == 3) {
