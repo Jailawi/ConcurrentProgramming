@@ -1,12 +1,15 @@
 package clock.io;
 
-public class AlarmHandler {
+import java.util.concurrent.Semaphore;
+
+public class AlarmHandler implements Runnable {
     private int h, m, s;
     Time alarmTime = new Time(h, m, s);
     private ClockOutput out;
     private ClockInput in;
     private boolean on = false;
     private Clock clock;
+    private Semaphore sem = new Semaphore(1);
 
     public AlarmHandler(ClockOutput out, ClockInput in, Clock clock) {
         this.out = out;
@@ -19,6 +22,7 @@ public class AlarmHandler {
         this.m = m;
         this.s = s;
         // out.displayTime(h, m, s);
+        System.out.println(h + " " + m + " " + s);
     }
 
     // anledningen till att vi skriver så är för att lägga till mutex sen
@@ -49,12 +53,32 @@ public class AlarmHandler {
 
     }
 
-    public void checkAlarm() {
-        // System.out.print("working outside if statement");
-        if (alarmTime.equals(clock.getTime().getCurrentTime())) {
-            System.out.print("working inside if statement");
+    private boolean isEqual() {
+        return h == clock.getTime().getHour() && m == clock.getTime().getMin() && s == clock.getTime().getSec();
+
+    }
+
+    public void checkAlarm() throws InterruptedException {
+        sem.acquire();
+        // System.out.println("Current second is " + s);
+        // System.out.println("working outside if statement");
+        if (isEqual()) {
+            // System.out.print("working inside if statement");
             alarmBeep();
 
+        }
+        sem.release();
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                checkAlarm();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 

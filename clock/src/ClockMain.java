@@ -16,10 +16,10 @@ public class ClockMain {
         Clock clock = new Clock(out, in);
         Thread clockThread = new Thread(clock);
         AlarmHandler alarmHandler = new AlarmHandler(out, in, clock);
-        // Thread alarmThread = new Thread(alarmHandler);
+        Thread alarmThread = new Thread(alarmHandler);
 
         clockThread.start();
-        // alarmThread.start();
+        alarmThread.start();
 
         while (true) {
             in.getSemaphore().acquire();
@@ -29,9 +29,6 @@ public class ClockMain {
             int m = userInput.getMinutes();
             int s = userInput.getSeconds();
 
-            if (alarmHandler.isOn()) {
-                alarmHandler.checkAlarm();
-            }
             if (choice == 1) {
                 clock.setTime(h, m, s);
             } else if (choice == 2) {
@@ -43,7 +40,7 @@ public class ClockMain {
                 alarmHandler.isAlarmOn(false);
             }
 
-            // System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
+            System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
         }
 
     }
