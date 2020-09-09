@@ -7,6 +7,10 @@ import clock.io.ClockOutput;
 
 public class ClockMain {
 
+    private static int SET_TIME = 1; // user set new clock time
+    private static int SET_ALARM = 2; // user set new alarm time
+    private static int TOGGLE_ALARM = 3; // user pressed both buttons simultaneously
+
     public static void main(String[] args) throws InterruptedException {
         AlarmClockEmulator emulator = new AlarmClockEmulator();
 
@@ -29,15 +33,15 @@ public class ClockMain {
             int m = userInput.getMinutes();
             int s = userInput.getSeconds();
 
-            if (choice == 1) {
+            if (choice == SET_TIME) {
                 clock.setTime(h, m, s);
-            } else if (choice == 2) {
+            } else if (choice == SET_ALARM) {
                 alarmHandler.isAlarmOn(true);
                 alarmHandler.setAlarm(h, m, s);
 
-            } else if (choice == 3) {
+            } else if (choice == TOGGLE_ALARM) {
                 alarmHandler.isAlarmOn(false);
-                alarmThread.interrupt();
+                // alarmThread.interrupt();
             }
 
             System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);

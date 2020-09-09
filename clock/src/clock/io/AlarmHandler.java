@@ -34,7 +34,11 @@ public class AlarmHandler implements Runnable {
         try {
             for (var i = 0; i <= 20; i++) {
                 long now = System.currentTimeMillis();
-                out.alarm();
+                if (on) {
+                    out.alarm();
+                } else {
+                    break;
+                }
                 Thread.sleep((t0 + ((sec + 1) * 1000)) - now);
                 sec++;
             }
