@@ -28,30 +28,12 @@ public class Time {
 		return s;
 	}
 
-	/*
-	 * public void getTimeFromUser(UserInput userInput) throws InterruptedException
-	 * { mutex.acquire(); h= userInput.getHours(); m= userInput.getMinutes(); s=
-	 * userInput.getSeconds(); mutex.release(); }
-	 * 
-	 */
-
 	public void setTime(int h, int m, int s) throws InterruptedException {
 		mutex.acquire();
 		this.h = h;
 		this.m = m;
 		this.s = s;
 		mutex.release();
-	}
-
-	public boolean equals(Time clockTime) {
-		try {
-			mutex.acquire();
-			boolean b = h == clockTime.getHour() && m == clockTime.getMin() && s == clockTime.getSec();
-			mutex.release();
-			return b;
-		} catch (InterruptedException e) {
-			throw new Error(e);
-		}
 	}
 
 	public void increaseTime() throws InterruptedException {

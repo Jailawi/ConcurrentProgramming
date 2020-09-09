@@ -1,23 +1,17 @@
 package clock.io;
 
-import java.util.concurrent.Semaphore;
-
 public class Clock implements Runnable {
 	private int h, m, s;
 	private ClockOutput out;
-	private ClockInput in;
 	private Time time = new Time(h, m, s);
-	private Semaphore mutex = new Semaphore(1);
 
-	public Clock(ClockOutput out, ClockInput in) {
+	public Clock(ClockOutput out) {
 		this.out = out;
-		this.in = in;
 	}
 
 	public void run() {
 		while (true) {
 			timeTicking();
-
 		}
 	}
 
@@ -28,14 +22,6 @@ public class Clock implements Runnable {
 	public Time getTime() {
 		return time;
 	}
-
-	/*
-	 * 
-	 * private void updateClockWithUserInput() throws InterruptedException {
-	 * in.getSemaphore().acquire(); UserInput userInput = in.getUserInput();
-	 * time.getTimeFromUser(userInput); }
-	 * 
-	 */
 
 	private void timeTicking() {
 		long t0 = System.currentTimeMillis();

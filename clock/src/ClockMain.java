@@ -13,12 +13,13 @@ public class ClockMain {
         ClockInput in = emulator.getInput();
         ClockOutput out = emulator.getOutput();
 
-        Clock clock = new Clock(out, in);
+        Clock clock = new Clock(out);
         Thread clockThread = new Thread(clock);
-        AlarmHandler alarmHandler = new AlarmHandler(out, in, clock);
+        AlarmHandler alarmHandler = new AlarmHandler(out, clock);
         Thread alarmThread = new Thread(alarmHandler);
 
         clockThread.start();
+        alarmThread.start();
 
         while (true) {
             in.getSemaphore().acquire();
@@ -33,11 +34,10 @@ public class ClockMain {
             } else if (choice == 2) {
                 alarmHandler.isAlarmOn(true);
                 alarmHandler.setAlarm(h, m, s);
-                alarmThread.start();
-                // alarmHandler.soundTheAlarm(clock.getTime().getCurrentTime());
 
             } else if (choice == 3) {
                 alarmHandler.isAlarmOn(false);
+                alarmThread.interrupt();
             }
 
             System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
