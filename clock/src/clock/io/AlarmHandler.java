@@ -8,7 +8,7 @@ public class AlarmHandler implements Runnable {
     private ClockOutput out;
     private boolean on = false;
     private Clock clock;
-    private Semaphore sem = new Semaphore(4); // 4
+    private Semaphore sem = new Semaphore(5); // 4
 
     public AlarmHandler(ClockOutput out, Clock clock) {
         this.out = out;
@@ -68,11 +68,14 @@ public class AlarmHandler implements Runnable {
     @Override
     public void run() {
         while (true) {
+
             try {
+                sem.acquire();
                 checkAlarm();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            sem.release();
         }
     }
 
