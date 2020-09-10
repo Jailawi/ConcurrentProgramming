@@ -8,23 +8,27 @@ public class AlarmHandler implements Runnable {
     private ClockOutput out;
     private boolean on = false;
     private Clock clock;
-    private Semaphore sem = new Semaphore(2);
+    private Semaphore sem = new Semaphore(4); // 4
 
     public AlarmHandler(ClockOutput out, Clock clock) {
         this.out = out;
         this.clock = clock;
     }
 
-    public void setAlarm(int h, int m, int s) {
+    public void setAlarm(int h, int m, int s) throws InterruptedException {
+        sem.acquire();
         this.h = h;
         this.m = m;
         this.s = s;
+        sem.release();
     }
 
-    // anledningen till att vi skriver så är för att lägga till mutex sen
-    public void isAlarmOn(boolean indicator) {
+    // anledningen till att vi skriver så är för att lägga till sem sen
+    public void isAlarmOn(boolean indicator) throws InterruptedException {
+        sem.acquire();
         out.setAlarmIndicator(indicator);
         on = indicator;
+        sem.release();
     }
 
     // it should beep for 20 sec

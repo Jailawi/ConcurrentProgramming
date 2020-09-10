@@ -46,7 +46,7 @@ public class ClockMain {
                 alarmHandler.isAlarmOn(toggleAlarm);
             }
 
-            System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
+            // System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
         }
 
     }
