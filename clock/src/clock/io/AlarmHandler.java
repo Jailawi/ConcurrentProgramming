@@ -4,11 +4,11 @@ import java.util.concurrent.Semaphore;
 
 public class AlarmHandler implements Runnable {
     private int h, m, s;
-    Time alarmTime = new Time(h, m, s);
+    // Time alarmTime = new Time(h, m, s);
     private ClockOutput out;
     private boolean on = false;
     private Clock clock;
-    private Semaphore sem = new Semaphore(1);
+    private Semaphore sem = new Semaphore(2);
 
     public AlarmHandler(ClockOutput out, Clock clock) {
         this.out = out;
@@ -29,9 +29,11 @@ public class AlarmHandler implements Runnable {
 
     // it should beep for 20 sec
     public void alarmBeep() {
-        long t0 = System.currentTimeMillis();
-        int sec = 0;
+
         try {
+            sem.acquire();
+            long t0 = System.currentTimeMillis();
+            int sec = 0;
             for (var i = 0; i <= 20; i++) {
                 long now = System.currentTimeMillis();
                 if (on) {
@@ -42,6 +44,7 @@ public class AlarmHandler implements Runnable {
                 Thread.sleep((t0 + ((sec + 1) * 1000)) - now);
                 sec++;
             }
+            sem.release();
         } catch (InterruptedException e) {
             throw new Error(e);
         }
@@ -50,9 +53,9 @@ public class AlarmHandler implements Runnable {
 
     public void checkAlarm() throws InterruptedException {
         sem.acquire();
-        boolean timeEqualsAlarm = h == clock.getTime().getHour() && m == clock.getTime().getMin()
+        boolean currentTimeEqualsAlarm = h == clock.getTime().getHour() && m == clock.getTime().getMin()
                 && s == clock.getTime().getSec();
-        if (timeEqualsAlarm) {
+        if (currentTimeEqualsAlarm) {
             alarmBeep();
         }
         sem.release();
