@@ -8,7 +8,7 @@ public class AlarmHandler implements Runnable {
     private ClockOutput out;
     private boolean on = false;
     private Clock clock;
-    private Semaphore sem = new Semaphore(5); // 4
+    private Semaphore sem = new Semaphore(1); // 4
 
     public AlarmHandler(ClockOutput out, Clock clock) {
         this.out = out;
@@ -23,24 +23,24 @@ public class AlarmHandler implements Runnable {
         sem.release();
     }
 
-    // anledningen till att vi skriver så är för att lägga till sem sen
     public void isAlarmOn(boolean indicator) throws InterruptedException {
-        sem.acquire();
         out.setAlarmIndicator(indicator);
         on = indicator;
-        sem.release();
+    }
+    
+    public boolean isOn() throws InterruptedException {
+    	boolean b= on;
+    	return on;
     }
 
-    // it should beep for 20 sec
     public void alarmBeep() {
 
         try {
-            sem.acquire();
             long t0 = System.currentTimeMillis();
             int sec = 0;
             for (var i = 0; i <= 20; i++) {
                 long now = System.currentTimeMillis();
-                if (on) {
+                if (isOn()) {
                     out.alarm();
                 } else {
                     break;
@@ -48,12 +48,13 @@ public class AlarmHandler implements Runnable {
                 Thread.sleep((t0 + ((sec + 1) * 1000)) - now);
                 sec++;
             }
-            sem.release();
         } catch (InterruptedException e) {
             throw new Error(e);
         }
 
     }
+    
+    
 
     public void checkAlarm() throws InterruptedException {
         sem.acquire();
@@ -70,12 +71,10 @@ public class AlarmHandler implements Runnable {
         while (true) {
 
             try {
-                sem.acquire();
                 checkAlarm();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            sem.release();
         }
     }
 

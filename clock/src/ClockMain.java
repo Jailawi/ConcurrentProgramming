@@ -1,3 +1,5 @@
+import java.util.concurrent.Semaphore;
+
 import clock.AlarmClockEmulator;
 import clock.io.AlarmHandler;
 import clock.io.Clock;
@@ -14,6 +16,7 @@ public class ClockMain {
 
     public static void main(String[] args) throws InterruptedException {
         AlarmClockEmulator emulator = new AlarmClockEmulator();
+    //    Semaphore mutex = new Semaphore(1);
 
         ClockInput in = emulator.getInput();
         ClockOutput out = emulator.getOutput();
@@ -28,22 +31,30 @@ public class ClockMain {
 
         while (true) {
             in.getSemaphore().acquire();
+           // mutex.acquire();
             UserInput userInput = in.getUserInput();
             int choice = userInput.getChoice();
             int h = userInput.getHours();
             int m = userInput.getMinutes();
             int s = userInput.getSeconds();
+           // mutex.release();
 
             if (choice == SET_TIME) {
+          //  	mutex.acquire();
                 clock.setTime(h, m, s);
+          //      mutex.release();
             } else if (choice == SET_ALARM) {
+           // 	mutex.acquire();
                 toggleAlarm = true;
                 alarmHandler.isAlarmOn(toggleAlarm);
                 alarmHandler.setAlarm(h, m, s);
+         //       mutex.release();
 
             } else if (choice == TOGGLE_ALARM) {
+        //    	mutex.acquire();
                 toggleAlarm = !toggleAlarm;
                 alarmHandler.isAlarmOn(toggleAlarm);
+        //        mutex.release();
             }
 
             // System.out.println("choice=" + choice + " h=" + h + " m=" + m + " s=" + s);
