@@ -4,11 +4,10 @@ import java.util.concurrent.Semaphore;
 
 public class AlarmHandler implements Runnable {
     private int h, m, s;
-    // Time alarmTime = new Time(h, m, s);
     private ClockOutput out;
     private boolean on = false;
     private Clock clock;
-    private Semaphore sem = new Semaphore(1); // 4
+    private Semaphore sem = new Semaphore(1); 
 
     public AlarmHandler(ClockOutput out, Clock clock) {
         this.out = out;

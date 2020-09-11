@@ -7,37 +7,36 @@ public class Time {
 	private Semaphore mutex = new Semaphore(1);
 
 	public Time(int h, int m, int s) {
-			this.h = h;
-			this.s = s;
-			this.m = m;
-			
-		
+		this.h = h;
+		this.s = s;
+		this.m = m;
+
 	}
 
 	public Time getCurrentTime() throws InterruptedException {
 		mutex.acquire();
-		Time t= this;
+		Time t = this;
 		mutex.release();
 		return t;
 	}
 
 	public int getHour() throws InterruptedException {
 		mutex.acquire();
-		int a=  h;
+		int a = h;
 		mutex.release();
 		return a;
 	}
 
 	public int getMin() throws InterruptedException {
 		mutex.acquire();
-		int a=  m;
+		int a = m;
 		mutex.release();
 		return a;
 	}
 
 	public int getSec() throws InterruptedException {
 		mutex.acquire();
-		int a= s;
+		int a = s;
 		mutex.release();
 		return a;
 	}
