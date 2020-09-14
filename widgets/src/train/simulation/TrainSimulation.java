@@ -9,12 +9,7 @@ import train.view.TrainView;
 
 public class TrainSimulation {
 
-	public static void main(String[] args) {
-		List<Segment> train = new LinkedList<>();
-
-		TrainView view = new TrainView();
-
-		Route route = view.loadRoute();
+	public void createTrain(List<Segment> train, Route route) {
 
 		for (int i = 0; i < 3; i++) {
 			train.add(route.next());
@@ -23,13 +18,38 @@ public class TrainSimulation {
 		for (int i = 0; i < 3; i++) {
 			train.get(i).enter();
 		}
+	}
+
+	public void moveTrain(Route route, List<Segment> train) {
+		Segment head1 = route.next();
+		train.add(0, head1);
+		head1.enter();
+		Segment tail = train.remove(train.size() - 1);
+		tail.exit();
+	}
+
+	public static void main(String[] args) {
+		TrainSimulation ts = new TrainSimulation();
+		
+		TrainView view = new TrainView();
+
+		List<Segment> train1 = new LinkedList<>();
+		List<Segment> train2 = new LinkedList<>();
+		List<Segment> train3 = new LinkedList<>();
+
+		Route route1 = view.loadRoute();
+		Route route2 = view.loadRoute();
+		Route route3 = view.loadRoute();
+
+		ts.createTrain(train1, route1);
+		ts.createTrain(train2, route2);
+		ts.createTrain(train3, route3);
 
 		while (true) {
-			Segment head = route.next();
-			train.add(0, head);
-			head.enter();
-			Segment tail = train.remove(train.size() - 1);
-			tail.exit();
+			ts.moveTrain(route1, train1);
+			ts.moveTrain(route2, train2);
+			ts.moveTrain(route3, train3);
+
 		}
 
 	}
