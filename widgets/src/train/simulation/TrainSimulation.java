@@ -3,6 +3,7 @@ package train.simulation;
 import java.util.LinkedList;
 import java.util.List;
 
+import train.model.Monitor;
 import train.model.Route;
 import train.model.Segment;
 import train.view.TrainView;
@@ -20,16 +21,11 @@ public class TrainSimulation {
 		}
 	}
 
-	public void moveTrain(Route route, List<Segment> train) {
-		Segment head1 = route.next();
-		train.add(0, head1);
-		head1.enter();
-		Segment tail = train.remove(train.size() - 1);
-		tail.exit();
-	}
 
-	public static void main(String[] args) {
+
+	public static void main(String[] args) throws InterruptedException {
 		TrainSimulation ts = new TrainSimulation();
+		Monitor m = new Monitor();
 		
 		TrainView view = new TrainView();
 
@@ -46,9 +42,9 @@ public class TrainSimulation {
 		ts.createTrain(train3, route3);
 
 		while (true) {
-			ts.moveTrain(route1, train1);
-			ts.moveTrain(route2, train2);
-			ts.moveTrain(route3, train3);
+			m.move(route1, train1);
+			m.move(route2, train2);
+			m.move(route3, train3);
 
 		}
 

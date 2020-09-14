@@ -8,3 +8,4 @@ Tågsimulationen fungerar tills två tåg vill gå in i samma segment, den gemen
 tågen rör sig i. Man kan se till att tågen inte kan occupera samma segment genom att få ett av tågen att stanna tills
 det önskade segmentet är ledigt igen.   
  
+ 
