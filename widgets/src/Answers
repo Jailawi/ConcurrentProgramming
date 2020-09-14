@@ -1,0 +1,10 @@
+FRÅGA:
+Why doesn’t this train simulation work? Which are the shared resources? How can we ensure that a
+train can safely enter a given segment? (Hint: what happens when a regular, terrestrial train needs to
+enter a busy track segment?)
+
+SVAR:
+Tågsimulationen fungerar tills två tåg vill gå in i samma segment, den gemensamma resursen är alltså segmenten som
+tågen rör sig i. Man kan se till att tågen inte kan occupera samma segment genom att få ett av tågen att stanna tills
+det önskade segmentet är ledigt igen.   
+ 
