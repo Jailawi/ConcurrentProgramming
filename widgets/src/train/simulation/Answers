@@ -6,4 +6,4 @@ enter a busy track segment?)
 SVAR:
 Tågsimulationen fungerar tills två tåg vill gå in i samma segment, den gemensamma resursen är alltså segmenten som
 tågen rör sig i. Man kan se till att tågen inte kan occupera samma segment genom att få ett av tågen att stanna tills
-det önskade segmentet är ledigt igen. 
+det önskade segmentet är ledigt igen.   
