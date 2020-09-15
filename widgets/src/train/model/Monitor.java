@@ -41,22 +41,25 @@ public class Monitor {
 
 	}
 
-	public synchronized void moveTail(Route route, List<Segment> train) throws InterruptedException {
+	public synchronized Segment moveTail(Route route, List<Segment> train) throws InterruptedException {
 		Segment tail = train.remove(train.size() - 1);
 		System.out.println("before in MoveTail:  " + busySegments);
 
 		System.out.println("after in MoveTail:  " + busySegments);
 
-		tail.exit();
 		busySegments.remove(tail);
-
 		notifyAll();
+		return tail;
 
 	}
 
-	public synchronized void move(Route route, List<Segment> train) throws InterruptedException {
+	public void exitTail(Segment tail) {
+		tail.exit();
+	}
+
+	public void move(Route route, List<Segment> train) throws InterruptedException {
 		moveHead(route, train);
-		moveTail(route, train);
+		exitTail(moveTail(route, train));
 	}
 
 }
