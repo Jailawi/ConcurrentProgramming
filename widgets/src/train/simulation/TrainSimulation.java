@@ -33,20 +33,62 @@ public class TrainSimulation {
 		List<Segment> train2 = new LinkedList<>();
 		List<Segment> train3 = new LinkedList<>();
 
-		Route route1 = view.loadRoute();
-		Route route2 = view.loadRoute();
-		Route route3 = view.loadRoute();
+	
+		//Route route3 = view.loadRoute();
 
-		ts.createTrain(train1, route1);
-		ts.createTrain(train2, route2);
-		ts.createTrain(train3, route3);
+		//ts.createTrain(train2, route2);
+		//ts.createTrain(train3, route3);
+		
+		Thread trainThread1=new Thread(()->{
+			try {
+				Route route1 = view.loadRoute();
+				ts.createTrain(train1, route1);
+				while(true) {
+					m.move(route1, train1);	
+				}
+				
+				
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
-		while (true) {
-			m.move(route1, train1);
-			m.move(route2, train2);
-			m.move(route3, train3);
+		});
+		
+		Thread trainThread2=new Thread(()->{
+			try {
+				Route route2 = view.loadRoute();
+				ts.createTrain(train2, route2);
+				while(true) {
+					m.move(route2, train2);	
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
+		});
+		
+		Thread trainThread3=new Thread(()->{
+			try {
+				Route route3 = view.loadRoute();
+				ts.createTrain(train3, route3);
+				while(true) {
+					m.move(route3, train3);	
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		});
+		
+		while(true) {
+			trainThread1.start();
+			trainThread2.start();
+			trainThread3.start();
 		}
+		
 
 	}
 
