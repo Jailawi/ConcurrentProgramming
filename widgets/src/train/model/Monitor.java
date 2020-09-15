@@ -26,14 +26,14 @@ public class Monitor {
 	public synchronized void moveHead(Route route, List<Segment> train) throws InterruptedException {
 		Segment head = route.next();
 
-		System.out.println("before in MoveHead:  " + busySegments);
+		// System.out.println("before in MoveHead: " + busySegments);
 		while (busySegments.contains(head)) {
 			wait();
 		}
 
 		busySegments.add(head);
 
-		System.out.println("after in Movehead:  " + busySegments);
+		// System.out.println("after in Movehead: " + busySegments);
 
 		train.add(0, head);
 
@@ -43,10 +43,6 @@ public class Monitor {
 
 	public synchronized Segment moveTail(Route route, List<Segment> train) throws InterruptedException {
 		Segment tail = train.remove(train.size() - 1);
-		System.out.println("before in MoveTail:  " + busySegments);
-
-		System.out.println("after in MoveTail:  " + busySegments);
-
 		busySegments.remove(tail);
 		notifyAll();
 		return tail;
