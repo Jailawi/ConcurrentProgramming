@@ -76,7 +76,7 @@ public class LabToolController implements ToolController {
     }
     
     private synchronized void turnOff() throws InterruptedException {
-    	while(conveyorIsOn==false) {
+    	while(conveyorIsOn==false) { 
     		isBusy=true;
     	}
     	
