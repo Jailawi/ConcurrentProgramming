@@ -80,7 +80,7 @@ public class LabToolController implements ToolController {
     		isBusy=true;
     	}
     	
-    	conveyorIsOn=false;
+    	conveyorIsOn=false; 
     	conveyor.off();
     
     
