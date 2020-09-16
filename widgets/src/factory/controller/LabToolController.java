@@ -85,7 +85,7 @@ public class LabToolController implements ToolController {
     
     
     }
-     
+      
     // -----------------------------------------------------------------------
     
     public static void main(String[] args) {
