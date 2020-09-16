@@ -15,6 +15,9 @@ import factory.swingview.Factory;
 public class LabToolController implements ToolController {
     private final DigitalSignal conveyor, press, paint;
     private final long pressingMillis, paintingMillis;
+    private boolean conveyorIsOn;
+    private boolean isBusy;
+    
     
     public LabToolController(DigitalSignal conveyor, DigitalSignal press, DigitalSignal paint, long pressingMillis, long paintingMillis) {
         this.conveyor = conveyor;
@@ -22,6 +25,7 @@ public class LabToolController implements ToolController {
         this.paint = paint;
         this.pressingMillis = pressingMillis;
         this.paintingMillis = paintingMillis;
+        this.conveyorIsOn=true;
     }
 
     @Override
@@ -33,26 +37,53 @@ public class LabToolController implements ToolController {
         // (that is, in a separate thread).
         //
         if (widgetKind == WidgetKind.BLUE_RECTANGULAR_WIDGET) {
-            conveyor.off();
+        	turnOff();
             press.on();
             Thread.sleep(pressingMillis);
             press.off();
             Thread.sleep(pressingMillis);   // press needs this time to retract
-            conveyor.on();
+            turnOn();
+
+            isBusy=false;
+            notifyAll();
+
         }
     }
 
     @Override
     public void onPaintSensorHigh(WidgetKind widgetKind) throws InterruptedException {
-        //
-        // TODO: you will need to modify this method.
-        //
-        // Note that this method can be called concurrently with onPressSensorHigh
-        // (that is, in a separate thread).
-        //
+      
         if (widgetKind == WidgetKind.ORANGE_ROUND_WIDGET) {
-        	// TODO
+        	turnOff();
+        	paint.on();
+            Thread.sleep(paintingMillis);
+            paint.off();
+            turnOn();
+            isBusy=false;
+            notifyAll();
+
         }
+    }
+    
+    
+    private synchronized void turnOn() throws InterruptedException {
+    	while(isBusy) {
+    		wait();
+    	}
+    	conveyorIsOn=true;
+    	conveyor.on();
+    	
+    }
+    
+    private synchronized void turnOff() throws InterruptedException {
+    	while(conveyorIsOn==false) {
+    		isBusy=true;
+    	}
+    	
+    	conveyorIsOn=false;
+    	conveyor.off();
+    
+    
     }
     
     // -----------------------------------------------------------------------
