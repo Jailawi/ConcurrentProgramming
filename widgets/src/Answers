@@ -8,10 +8,4 @@ Tågsimulationen fungerar tills två tåg vill gå in i samma segment, den gemen
 tågen rör sig i. Man kan se till att tågen inte kan occupera samma segment genom att få ett av tågen att stanna tills
 det önskade segmentet är ledigt igen.   
  
- FRÅGA:
- think of what happens when the hydraulic press and the painting device are both active at the
-same time. When is it safe to start the conveyor belt?
-
-Om båda sker samtidigt och the hydralic press tar kortare tid, kommer den sätta igång bandet
-innan paint är klar.
-Det är safe att sätta igång bandet efter att den uppgift som tog längst tid är klar
+ 

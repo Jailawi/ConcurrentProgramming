@@ -10,7 +10,7 @@ import factory.controller.ToolController;
 import factory.model.WidgetKind;
 
 public class ToolControllerTest {
-    
+ 
     /** Test that the press is not lowered while the motor is running. */
     @Test
     public void noMoveDuringPress() throws InterruptedException {
@@ -74,7 +74,10 @@ public class ToolControllerTest {
         assertEquals("Motor was running while the press was active!", 0, motor.hiOnDisable());
     }
 
-    /** Test that the hydraulic press does not complete pressing faster than required. */
+    /**
+     * Test that the hydraulic press does not complete pressing faster than
+     * required.
+     */
     @Test
     public void pressingTakesTime() {
         long pressDelay = 200;
@@ -90,16 +93,13 @@ public class ToolControllerTest {
         long delta = System.currentTimeMillis() - t0;
         assertTrue("Pressing finished too soon.", delta >= cycleTime);
     }
-    
+
     // -----------------------------------------------------------------------
-    
+
     /** Helper method for creating a ToolController for a given MockFactory. */
     protected ToolController createControllerFor(MockFactory factory) {
-        return new LabToolController(factory.motor,
-                                     factory.press,
-                                     factory.gun,
-                                     factory.pressingMillis,
-                                     factory.paintingMillis);
+        return new LabToolController(factory.motor, factory.press, factory.gun, factory.pressingMillis,
+                factory.paintingMillis);
     }
 
 }
