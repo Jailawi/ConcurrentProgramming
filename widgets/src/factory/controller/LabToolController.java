@@ -1,5 +1,7 @@
 package factory.controller;
 
+import java.util.concurrent.Semaphore;
+
 import factory.model.DigitalSignal;
 import factory.model.WidgetKind;
 import factory.simulation.Painter;
@@ -17,6 +19,7 @@ public class LabToolController implements ToolController {
     private final long pressingMillis, paintingMillis;
     private boolean conveyorIsOn;
     private boolean isBusy;
+    private Semaphore sem = new Semaphore(2);
     
     
     public LabToolController(DigitalSignal conveyor, DigitalSignal press, DigitalSignal paint, long pressingMillis, long paintingMillis) {
@@ -44,9 +47,7 @@ public class LabToolController implements ToolController {
             Thread.sleep(pressingMillis);   // press needs this time to retract
             turnOn();
 
-            isBusy=false;
-            notifyAll();
-
+        
         }
     }
 
@@ -59,33 +60,34 @@ public class LabToolController implements ToolController {
             Thread.sleep(paintingMillis);
             paint.off();
             turnOn();
-            isBusy=false;
-            notifyAll();
+            
 
         }
     }
     
     
     private synchronized void turnOn() throws InterruptedException {
-    	while(isBusy) {
-    		wait();
-    	}
+    	sem.release();
+    	//Om båda har släppt kan vi gå vidare
+    	if (sem.availablePermits() == 2) {
+    	if(conveyorIsOn==false) {
     	conveyorIsOn=true;
     	conveyor.on();
+    	}
+    	}
     	
     }
     
     private synchronized void turnOff() throws InterruptedException {
-    	while(conveyorIsOn==false) { 
-    		isBusy=true;
-    	}
+    	sem.acquire();
     	
+    	if(conveyorIsOn) {
     	conveyorIsOn=false; 
     	conveyor.off();
     
-    
+    	}
     }
-      
+     
     // -----------------------------------------------------------------------
     
     public static void main(String[] args) {
