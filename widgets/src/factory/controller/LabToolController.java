@@ -9,8 +9,8 @@ import factory.simulation.Press;
 import factory.swingview.Factory;
 
 /**
- * Implementation of the ToolController interface,
- * to be used for the Widget Factory lab.
+ * Implementation of the ToolController interface, to be used for the Widget
+ * Factory lab.
  * 
  * @see ToolController
  */
@@ -20,19 +20,19 @@ public class LabToolController implements ToolController {
     private boolean conveyorIsOn;
     private boolean isBusy;
     private Semaphore sem = new Semaphore(2);
-    
-    
-    public LabToolController(DigitalSignal conveyor, DigitalSignal press, DigitalSignal paint, long pressingMillis, long paintingMillis) {
+
+    public LabToolController(DigitalSignal conveyor, DigitalSignal press, DigitalSignal paint, long pressingMillis,
+            long paintingMillis) {
         this.conveyor = conveyor;
         this.press = press;
         this.paint = paint;
         this.pressingMillis = pressingMillis;
         this.paintingMillis = paintingMillis;
-        this.conveyorIsOn=true;
+        this.conveyorIsOn = true;
     }
 
     @Override
-    public void onPressSensorHigh(WidgetKind widgetKind) throws InterruptedException {
+    public synchronized void onPressSensorHigh(WidgetKind widgetKind) throws InterruptedException {
         //
         // TODO: you will need to modify this method.
         //
@@ -40,63 +40,68 @@ public class LabToolController implements ToolController {
         // (that is, in a separate thread).
         //
         if (widgetKind == WidgetKind.BLUE_RECTANGULAR_WIDGET) {
-        	turnOff();
+            turnOff();
             press.on();
-            Thread.sleep(pressingMillis);
+            // wait(pressingMillis);
+            waitOutside(pressingMillis);
             press.off();
-            Thread.sleep(pressingMillis);   // press needs this time to retract
+            // wait(pressingMillis);
+            waitOutside(pressingMillis);
             turnOn();
 
-        
         }
     }
 
     @Override
-    public void onPaintSensorHigh(WidgetKind widgetKind) throws InterruptedException {
-      
+    public synchronized void onPaintSensorHigh(WidgetKind widgetKind) throws InterruptedException {
+
         if (widgetKind == WidgetKind.ORANGE_ROUND_WIDGET) {
-        	turnOff();
-        	paint.on();
-            Thread.sleep(paintingMillis);
+            turnOff();
+            paint.on();
+            waitOutside(paintingMillis);
+            // wait(paintingMillis);
             paint.off();
             turnOn();
-            
 
         }
     }
-    
-    
+
+    private void waitOutside(long millis) throws InterruptedException {
+        long timeToWakeUp = System.currentTimeMillis() + millis;
+        while (System.currentTimeMillis() < timeToWakeUp) {
+            long dt = timeToWakeUp - System.currentTimeMillis();
+            wait(dt);
+        }
+    }
+
     private synchronized void turnOn() throws InterruptedException {
-    	sem.release();
-    	//Om båda har släppt kan vi gå vidare
-    	if (sem.availablePermits() == 2) {
-    	if(conveyorIsOn==false) {
-    	conveyorIsOn=true;
-    	conveyor.on();
-    	}
-    	}
-    	
+        sem.release();
+        // Om båda har släppt kan vi gå vidare
+        if (sem.availablePermits() == 2) {
+            if (conveyorIsOn == false) {
+                conveyorIsOn = true;
+                conveyor.on();
+            }
+        }
+
     }
-    
+
     private synchronized void turnOff() throws InterruptedException {
-    	sem.acquire();
-    	
-    	if(conveyorIsOn) {
-    	conveyorIsOn=false; 
-    	conveyor.off();
-    
-    	}
+        sem.acquire();
+
+        if (conveyorIsOn) {
+            conveyorIsOn = false;
+            conveyor.off();
+
+        }
     }
-     
+
     // -----------------------------------------------------------------------
-    
+
     public static void main(String[] args) {
         Factory factory = new Factory();
-        ToolController toolController = new LabToolController(factory.getConveyor(),
-                                                              factory.getPress(),
-                                                              factory.getPaint(),
-                                                              Press.PRESSING_MILLIS,
-                                                              Painter.PAINTING_MILLIS);
+        ToolController toolController = new LabToolController(factory.getConveyor(), factory.getPress(),
+                factory.getPaint(), Press.PRESSING_MILLIS, Painter.PAINTING_MILLIS);
         factory.startSimulation(toolController);
     }
 }

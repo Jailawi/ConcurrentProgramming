@@ -7,5 +7,50 @@ SVAR:
 Tågsimulationen fungerar tills två tåg vill gå in i samma segment, den gemensamma resursen är alltså segmenten som
 tågen rör sig i. Man kan se till att tågen inte kan occupera samma segment genom att få ett av tågen att stanna tills
 det önskade segmentet är ledigt igen.   
- 
- 
+
+FRÅGA:
+Why does the widget factory’s throughput change when you use wait instead of sleep?
+
+SVAR:
+Den stora skillnaden är att wait() lämnar över låset eller monitorn medan den väntar, som vi såg i hans video så 
+hamnar de i en egen kö och hindrar inte andra trådar från att gå in och använda monitormetoden. Sleep() å andra sidan
+lämnar inte låset eller synchronized monitormetoden medan den väntar. Wait används för signalering mellan trådar
+medan sleep används för att pausa exekveringen. 
+
+wait() 
+- Lämnar låset för att andra objekt ska ha möjligheten att exekvera
+
+sleep(t) 
+– Håller i låset under tiden t och inga andra trådar kan köras samtidigt.
+
+
+FRÅGA:
+First, see what happens if you don’t wait() in your loop. Comment out your call to wait(), and
+run your simulation.
+What happens? Why?
+
+SVAR:
+Så fort 2 tåg "krockar" så stannar allt
+Anledningen är att vi fastnar i whilesatsen och den kommer ej kunna komma ut ur den
+
+
+FRÅGOR:
+• What is the problem? Is it about a particular point in the code, or something else?
+• Length 3 seems to work, but length 7 does not. Can you think of a safe maximal train length
+N >, for which this problem cannot possibly occur? (Recall that these trains are expected
+to operate autonomously on a remote planet, so we want to be really sure.)
+
+
+SVAR:
+Problemet blir att tågen blockar för varandra från olika håll vilket
+sätter stopp för alla tåg i samma intersektion.
+Tågen kan max vara 4 segment långa
+
+
+
+
+FRÅGA:
+Case a illustrates the concept(s)-busy wait(?)
+Case b illustrates the concept(s)-racecondition
+Case c illustrates the concept(s)-racecondition, andra trådar kommer in
+Case d illustrates the concept(s)-deadlock,de väntar på varandra, alla är låsta
