@@ -19,6 +19,7 @@ public class PassengerThread implements Runnable {
 				int toFloor = pass.getDestinationFloor();
 				pass.begin();
 				monitor.setPassengerTravel(fromFloor, toFloor, pass);
+				pass.end();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

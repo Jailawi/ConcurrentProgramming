@@ -6,7 +6,7 @@ public class LiftThread implements Runnable {
 	private int currentFloor = 0;
 	private int next = 1;
 	private int nextFloor = currentFloor + next;
-	private boolean stop = false;
+	private boolean stop, stop1, stop2 = false;
 
 	public LiftThread(LiftView lift, Monitor m) {
 		this.lift = lift;
@@ -14,7 +14,7 @@ public class LiftThread implements Runnable {
 	}
 
 	private synchronized void waitOutside() throws InterruptedException {
-		wait(1000);
+		wait(1250);
 	}
 
 	@Override
@@ -22,18 +22,16 @@ public class LiftThread implements Runnable {
 		while (true) {
 
 			for (int i = 0; i <= 5; i++) {
-				// System.out.println("this should be false: " + stop);
 				lift.moveLift(currentFloor, currentFloor + 1);
 				currentFloor++;
 				lift.openDoors(currentFloor);
-
-				stop = m.checkEntering(currentFloor);
-				// System.out.println("this should be true if passenger is waiting: " + stop);
-
-				if (stop) {
+				stop1 = m.checkExiting(currentFloor);
+				stop2 = m.checkEntering(currentFloor);
+				if (stop1 || stop2) {
 					try {
 						waitOutside();
-						stop = false;
+						stop1 = false;
+						stop2 = false;
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -51,11 +49,13 @@ public class LiftThread implements Runnable {
 				System.out.println(currentFloor);
 				lift.openDoors(currentFloor);
 				// checkExiting(currentFloor);
-				stop = m.checkEntering(currentFloor);
-				if (stop) {
+				stop1 = m.checkExiting(currentFloor);
+				stop2 = m.checkEntering(currentFloor);
+				if (stop1 || stop2) {
 					try {
 						waitOutside();
-						stop = false;
+						stop1 = false;
+						stop2 = false;
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

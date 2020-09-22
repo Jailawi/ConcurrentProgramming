@@ -15,9 +15,11 @@ public class OnePersonRidesLift {
         Thread lift = new Thread(lt);
         lift.start();
 
-        PassengerThread pt = new PassengerThread(monitor, view);
-        Thread pass = new Thread(pt);
-        pass.start();
+        for (var i = 0; i < 2; i++) {
+            PassengerThread pt = new PassengerThread(monitor, view);
+            Thread pass = new Thread(pt);
+            pass.start();
+        }
 
         /*
          * Passenger pass = view.createPassenger(); int fromFloor =
