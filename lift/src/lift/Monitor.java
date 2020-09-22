@@ -63,7 +63,6 @@ public class Monitor {
 
 	public synchronized boolean checkEntering(int currentFloor) {
 		// System.out.println(waitEntry[currentFloor]);
-		view.showDebugInfo(waitEntry, waitExit);
 
 		if (waitEntry[currentFloor] > 0) {
 			this.currentFloor = currentFloor;
