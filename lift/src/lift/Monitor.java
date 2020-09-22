@@ -108,7 +108,7 @@ public class Monitor {
 				}
 			}else if(stop2) {
 				try {
-					waitOutside(waitEntry[currentFloor]+1);
+					waitOutside(Math.abs(( waitEntry[currentFloor]-load))+1);
 					stop2 = false;
 					stop1= false;
 				} catch (InterruptedException e) {
@@ -148,7 +148,7 @@ public class Monitor {
 			}
 		}else if(stop2) {
 			try {
-				waitOutside(waitEntry[currentFloor]+1);
+				waitOutside(Math.abs(( waitEntry[currentFloor]-load))+1);
 				stop1=false;
 				stop2 = false;
 			} catch (InterruptedException e) {
