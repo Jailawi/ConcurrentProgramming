@@ -34,11 +34,12 @@ public class Monitor {
 	public synchronized void setPassengerTravel(int fromFloor, int toFloor, Passenger pass)
 			throws InterruptedException {
 		waitEntry[fromFloor] += 1;
-		waitExit[toFloor] += 1;
+
 		while (fromFloor != currentFloor || load == 4) {
 			wait();
 		}
 		pass.enterLift();
+		waitExit[toFloor] += 1;
 		load++;
 		while (currentFloor != toFloor) {
 			wait();
