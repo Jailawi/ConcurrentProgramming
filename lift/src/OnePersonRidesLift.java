@@ -11,11 +11,13 @@ public class OnePersonRidesLift {
         LiftView view = new LiftView();
         Monitor monitor = new Monitor(view);
 
-        PassengerThread pt = new PassengerThread(monitor, view);
-        pt.start();
-
         LiftThread lt = new LiftThread(view, monitor);
-        lt.start();
+        Thread lift = new Thread(lt);
+        lift.start();
+
+        PassengerThread pt = new PassengerThread(monitor, view);
+        Thread pass = new Thread(pt);
+        pass.start();
 
         /*
          * Passenger pass = view.createPassenger(); int fromFloor =

@@ -1,6 +1,6 @@
 package lift;
 
-public class PassengerThread extends Thread {
+public class PassengerThread implements Runnable {
 	private Monitor monitor;
 	private LiftView liftView;
 
@@ -15,7 +15,10 @@ public class PassengerThread extends Thread {
 			// wait(4500);
 			try {
 				Passenger pass = liftView.createPassenger();
-				monitor.addPassengerInLift(pass);
+				int fromFloor = pass.getStartFloor();
+				int toFloor = pass.getDestinationFloor();
+				pass.begin();
+				monitor.setPassengerTravel(fromFloor, toFloor, pass);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -6,14 +6,14 @@ import jdk.javadoc.doclet.Reporter;
 
 public class Monitor {
 	// int floor; // the floor the lift is currently on
-	boolean moving; // true if the lift is moving, false if standing still with doors open
+	boolean moving = true; // true if the lift is moving, false if standing still with doors open
 	int direction; // +1 if lift is going up, -1 if going down
 	int[] waitEntry; // number of passengers waiting to enter the lift at the various floors
 	int[] waitExit; // number of passengers (in lift) waiting to leave at the various floors
 	int load; // number of passengers currently in the lift
 	LiftView view;
 	int currentFloor = 0;
-	ReentrantLock l = new ReentrantLock();
+	boolean stopLift = false;
 
 	public Monitor(LiftView view) {
 		waitEntry = new int[7];
@@ -21,13 +21,13 @@ public class Monitor {
 		this.view = view;
 	}
 
-	public void reportPassengerWait(int fromFloor) {
-		waitEntry[fromFloor] = waitEntry[fromFloor] += 1;
-	}
+	// public void reportPassengerWait(int fromFloor) {
+	// waitEntry[fromFloor] = waitEntry[fromFloor] += 1;
+	// }
 
-	public void reportPassengerExit(int toFloor) {
-		waitExit[toFloor] = waitExit[toFloor] += 1;
-	}
+	// public void reportPassengerExit(int toFloor) {
+	// waitExit[toFloor] = waitExit[toFloor] += 1;
+	// }
 
 	private synchronized void reportPassengerEntered(int fromFloor) {
 		// System.out.println("is walking");
@@ -39,6 +39,17 @@ public class Monitor {
 		// System.out.println("entered");
 		waitExit[fromFloor] = waitEntry[fromFloor] -= 1;
 		notifyAll();
+	}
+
+	public synchronized void setPassengerTravel(int fromFloor, int toFloor, Passenger pass)
+			throws InterruptedException {
+		waitEntry[fromFloor] += 1;
+		while (fromFloor != currentFloor || load == 4) {
+			wait();
+		}
+		pass.enterLift();
+		load++;
+
 	}
 
 	public synchronized void addPassengerInLift(Passenger pass) throws InterruptedException {
@@ -58,11 +69,14 @@ public class Monitor {
 		// pass.exitLift();
 	}
 
-	private void checkEntering(int currentFloor) {
+	public synchronized boolean checkEntering(int currentFloor) {
 		// System.out.println(waitEntry[currentFloor]);
 		if (waitEntry[currentFloor] > 0) {
+			this.currentFloor = currentFloor;
 			reportPassengerEntered(currentFloor);
+			return true;
 		}
+		return false;
 	}
 
 	private void checkExiting(int currentFloor) {
@@ -87,10 +101,10 @@ public class Monitor {
 			for (int i = 0; i <= 5; i++) {
 				view.moveLift(currentFloor, currentFloor + 1);
 				currentFloor++;
-				checkEntering(currentFloor);
 				view.openDoors(currentFloor);
-				// checkExiting(currentFloor);
 
+				checkEntering(currentFloor);
+				// checkExiting(currentFloor);
 				view.closeDoors();
 
 			}
@@ -99,11 +113,18 @@ public class Monitor {
 				view.moveLift(currentFloor, currentFloor - 1);
 				currentFloor--;
 				view.openDoors(currentFloor);
+				if (stopLift) {
+					wait(1000);
+				}
 				// checkExiting(currentFloor);
 				checkEntering(currentFloor);
 				view.closeDoors();
 			}
 		}
+	}
+
+	public synchronized void waitOutside() throws InterruptedException {
+		wait(1000);
 	}
 
 }
