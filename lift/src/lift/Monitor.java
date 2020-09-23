@@ -14,6 +14,7 @@ public class Monitor {
 	private boolean stop, stop1, stop2 = false;
 	private boolean doorOpen;
 	int passengers;
+	int numberOfConcurrentlyWalking;
 
 	public Monitor(LiftView view) {
 		waitEntry = new int[7];
@@ -29,25 +30,44 @@ public class Monitor {
 		}
 	}
 	
-	public synchronized int getNbrOfExiting(int floor) {
-		return waitExit[floor];
-	}
-	
-	public synchronized int getNbrOfEntering(int floor) {
-		return waitEntry[floor];
-	}
 
-	private synchronized void reportPassengerEnteredLift(int fromFloor) {
+
+	private  void reportPassengerEnteredLift(int fromFloor) {
 
 		waitEntry[fromFloor] -= 1;
 		notifyAll();
 	}
 
-	private synchronized void reportPassengerExitedLift(int fromFloor) {
+	private  void reportPassengerExitedLift(int fromFloor) {
 		waitExit[fromFloor] = waitExit[fromFloor] -= 1;
 		notifyAll();
 	}
+	
+	public synchronized void putPassengeInLift(int fromFloor, int toFloor, Passenger pass) throws InterruptedException {
+		waitEntry[fromFloor] += 1;
+		passengers++;
 
+
+		while (fromFloor != currentFloor || load == 4 || !doorOpen) {
+			wait();
+		}
+		waitExit[toFloor] += 1;
+
+		load++;
+		
+	}
+	
+	public synchronized void exitPassengerFromLift(int fromFloor, int toFloor, Passenger pass) throws InterruptedException {
+		while (currentFloor != toFloor) {
+			wait();
+		}
+		
+		passengers--;
+		load--;
+		
+	}
+
+	/*
 	public synchronized void setPassengerTravel(int fromFloor, int toFloor, Passenger pass)
 			throws InterruptedException {
 
@@ -71,21 +91,22 @@ public class Monitor {
 		load--;
 
 	}
+	*/
 	
+
 
 	public synchronized boolean checkEntering(int currentFloor) {
 		// System.out.println(waitEntry[currentFloor]);
 		view.showDebugInfo(waitEntry, waitExit);
 		if (waitEntry[currentFloor] > 0) {
-			reportPassengerEnteredLift(currentFloor);
-
 			this.currentFloor = currentFloor;
+			reportPassengerEnteredLift(currentFloor);
 			return true;
 		}
 		return false;
 	}
 
-	public synchronized boolean checkExiting(int currentFloor) {
+	public synchronized  boolean checkExiting(int currentFloor) {
 
 		 System.out.println(waitExit[currentFloor]);
 		if (waitExit[currentFloor] > 0) {
@@ -112,11 +133,12 @@ public class Monitor {
 			}
 			stop1 = checkExiting(currentFloor);
 			stop2 = checkEntering(currentFloor);
+			numberOfConcurrentlyWalking=waitExit[currentFloor]+(waitEntry[currentFloor]-load);
 			if (stop1&&stop2) {
 				try {
 					//System.out.println("waitexit: " +waitExit[currentFloor]);
 					if(doorOpen) {
-					waitOutside(Math.abs(( waitEntry[currentFloor]-load + waitExit[currentFloor]))+1);
+					waitOutside(Math.abs(numberOfConcurrentlyWalking)+1);
 					
 					stop1 = false;
 					stop2=false;
@@ -128,7 +150,7 @@ public class Monitor {
 			}else if(stop2) {
 				try {
 					if(doorOpen) {
-					waitOutside(Math.abs(( waitEntry[currentFloor]-load))+1);
+					waitOutside(Math.abs(2*( waitEntry[currentFloor]-load))+1);
 					stop1=false;
 					stop2 = false;
 					}
@@ -139,7 +161,7 @@ public class Monitor {
 			}else if(stop1) {
 				try {
 					if(doorOpen) {
-					waitOutside(waitExit[currentFloor]+1);
+					waitOutside(2*waitExit[currentFloor]+1);
 					stop2 = false;
 					stop1= false;
 					}
@@ -164,7 +186,7 @@ public class Monitor {
 		view.moveLift(currentFloor, currentFloor - 1);
 		currentFloor--;
 		//System.out.println(currentFloor);
-		System.out.println("isDoorOpen: " + doorOpen);
+		//System.out.println("isDoorOpen: " + doorOpen);
 		if(waitEntry[currentFloor] >=1 && load <=3 || waitExit[currentFloor] >=1) {
 			view.openDoors(currentFloor);
 			doorOpen=true;
@@ -172,11 +194,12 @@ public class Monitor {
 		// checkExiting(currentFloor);
 		stop1 = checkExiting(currentFloor);
 		stop2 = checkEntering(currentFloor);
+		numberOfConcurrentlyWalking=waitExit[currentFloor]+(waitEntry[currentFloor]-load);
 		if (stop1&&stop2) {
 			try {
 				//System.out.println("waitexit: " +waitExit[currentFloor]);
 				if(doorOpen) {
-				waitOutside(Math.abs(( waitEntry[currentFloor]-load + waitExit[currentFloor]))+1);
+				waitOutside(Math.abs(numberOfConcurrentlyWalking)+1);
 				
 				stop1 = false;
 				stop2=false;
@@ -188,7 +211,7 @@ public class Monitor {
 		}else if(stop2) {
 			try {
 				if(doorOpen) {
-				waitOutside(Math.abs(( waitEntry[currentFloor]-load))+1);
+				waitOutside(Math.abs(2*( waitEntry[currentFloor]-load))+1);
 				stop1=false;
 				stop2 = false;
 				}
@@ -199,7 +222,7 @@ public class Monitor {
 		}else if(stop1) {
 			try {
 				if(doorOpen) {
-				waitOutside(waitExit[currentFloor]+1);
+				waitOutside(2*waitExit[currentFloor]+1);
 				stop2 = false;
 				stop1= false;
 				}
