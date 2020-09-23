@@ -7,23 +7,22 @@ public class LiftThread implements Runnable {
 	private int next = 1;
 	private int nextFloor = currentFloor + next;
 
-
 	public LiftThread(LiftView lift, Monitor m) {
 		this.lift = lift;
 		this.m = m;
 	}
 
-	
-
 	@Override
 	public void run() {
-	
+
 		while (true) {
 
-			m.isThereAPassenger();
-		
+			if (m.getPassengers() >= 1) {
+				m.moveUp();
+				m.moveDown();
+			}
+
 		}
 	}
-	
-	
+
 }

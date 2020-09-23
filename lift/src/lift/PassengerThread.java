@@ -13,7 +13,7 @@ public class PassengerThread implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				Thread.sleep(3000);
+				// Thread.sleep(3000);
 				Passenger pass = liftView.createPassenger();
 				int fromFloor = pass.getStartFloor();
 				int toFloor = pass.getDestinationFloor();
