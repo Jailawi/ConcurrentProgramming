@@ -81,113 +81,89 @@ public class Monitor {
 		wait(1250 * x);
 	}
 
+
+	public void checkCondition() {
+		stop1 = checkExiting(currentFloor);
+		stop2 = checkEntering(currentFloor);
+		
+		numberOfConcurrentlyWalking=waitExit[currentFloor] + 4-(load-waitExit[currentFloor]);
+
+		if (stop1&&stop2) {
+			try {
+				if(doorOpen) {
+				waitOutside((numberOfConcurrentlyWalking)+1);
+				
+				stop1 = false;
+				stop2=false;
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else if(stop2) {
+			try {
+				if(doorOpen) {
+				waitOutside(numberOfConcurrentlyWalking+1);
+				stop1=false;
+				stop2 = false;
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else if(stop1) {
+			try {
+				if(doorOpen) {
+				waitOutside(numberOfConcurrentlyWalking+1);
+				stop2 = false;
+				stop1= false;
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	
 	public void moveUp() {
 		for (int i = 0; i <= 5; i++) {
 			view.moveLift(currentFloor, currentFloor + 1);
 			currentFloor++;
-			if (waitEntry[currentFloor] >= 1 && load <= 3 || waitExit[currentFloor] >= 1) {
-				view.openDoors(currentFloor);
-				doorOpen = true;
+			if(waitEntry[currentFloor] >=1 && load <=3 || waitExit[currentFloor] >=1) {
+			
+			view.openDoors(currentFloor);
+			doorOpen=true;
 			}
-			stop1 = checkExiting(currentFloor);
-			stop2 = checkEntering(currentFloor);
-			numberOfConcurrentlyWalking = waitExit[currentFloor] + (waitEntry[currentFloor] - load);
-			if (stop1 && stop2) {
-				try {
-					// System.out.println("waitexit: " +waitExit[currentFloor]);
-					if (doorOpen) {
-						waitOutside(Math.abs(numberOfConcurrentlyWalking) + 1);
-
-						stop1 = false;
-						stop2 = false;
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else if (stop2) {
-				try {
-					if (doorOpen) {
-						waitOutside(Math.abs(2 * (waitEntry[currentFloor] - load)) + 1);
-						stop1 = false;
-						stop2 = false;
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else if (stop1) {
-				try {
-					if (doorOpen) {
-						waitOutside(2 * waitExit[currentFloor] + 1);
-						stop2 = false;
-						stop1 = false;
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-			if (doorOpen) {
-				doorOpen = false;
+		
+			checkCondition();	
+			if(doorOpen) {
+				doorOpen=false;
 				view.closeDoors();
-			}
+				}
 		}
-
+		
 	}
-
+	
+	
 	public void moveDown() {
-		for (int i = 5; i >= 0; i--) {
-			view.moveLift(currentFloor, currentFloor - 1);
-			currentFloor--;
-			if (waitEntry[currentFloor] >= 1 && load <= 3 || waitExit[currentFloor] >= 1) {
-				view.openDoors(currentFloor);
-				doorOpen = true;
+	for (int i = 5; i >= 0; i--) {
+		view.moveLift(currentFloor, currentFloor - 1);
+		currentFloor--;
+	
+		if(waitEntry[currentFloor] >=1 && load <=3 || waitExit[currentFloor] >=1) {
+			view.openDoors(currentFloor);
+			doorOpen=true;
 			}
-			stop1 = checkExiting(currentFloor);
-			stop2 = checkEntering(currentFloor);
-			numberOfConcurrentlyWalking = waitExit[currentFloor] + (waitEntry[currentFloor] - load);
-			if (stop1 && stop2) {
-				try {
-					if (doorOpen) {
-						waitOutside(Math.abs(numberOfConcurrentlyWalking) + 1);
-						stop1 = false;
-						stop2 = false;
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else if (stop2) {
-				try {
-					if (doorOpen) {
-						waitOutside(Math.abs(2 * (waitEntry[currentFloor] - load)) + 1);
-						stop1 = false;
-						stop2 = false;
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			} else if (stop1) {
-				try {
-					if (doorOpen) {
-						waitOutside(2 * waitExit[currentFloor] + 1);
-						stop2 = false;
-						stop1 = false;
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			if (doorOpen) {
-				doorOpen = false;
-				view.closeDoors();
-			}
+				
+		checkCondition();
+		if(doorOpen) {
+		doorOpen=false;
+		view.closeDoors();
 		}
-
 	}
+	
+}
 
 }
