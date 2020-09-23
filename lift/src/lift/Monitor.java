@@ -93,33 +93,40 @@ public class Monitor {
 		for (int i = 0; i <= 5; i++) {
 			view.moveLift(currentFloor, currentFloor + 1);
 			currentFloor++;
+			if(waitEntry[currentFloor] >=1 && load <=3 || waitExit[currentFloor] >=1) {
 			view.openDoors(currentFloor);
 			doorOpen=true;
+			}
 			stop1 = checkExiting(currentFloor);
 			stop2 = checkEntering(currentFloor);
 			if (stop1) {
 				try {
+					if(doorOpen) {
 					waitOutside(waitExit[currentFloor]+1);
 					stop1 = false;
 					stop2=false;
+					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}else if(stop2) {
 				try {
+					if(doorOpen) {
 					waitOutside(Math.abs(( waitEntry[currentFloor]-load))+1);
 					stop2 = false;
 					stop1= false;
+					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 			
-			doorOpen=false;
-			view.closeDoors();
-
+			if(doorOpen) {
+				doorOpen=false;
+				view.closeDoors();
+				}
 		}
 		
 	}
@@ -131,33 +138,42 @@ public class Monitor {
 		view.moveLift(currentFloor, currentFloor - 1);
 		currentFloor--;
 		//System.out.println(currentFloor);
-		view.openDoors(currentFloor);
-		doorOpen=true;
+		System.out.println("isDoorOpen: " + doorOpen);
+		if(waitEntry[currentFloor] >=1 && load <=3 || waitExit[currentFloor] >=1) {
+			view.openDoors(currentFloor);
+			doorOpen=true;
+			}
 		// checkExiting(currentFloor);
 		stop1 = checkExiting(currentFloor);
 		stop2 = checkEntering(currentFloor);
 		if (stop1) {
 			try {
-				System.out.println("waitexit: " +waitExit[currentFloor]);
+				//System.out.println("waitexit: " +waitExit[currentFloor]);
+				if(doorOpen) {
 				waitOutside(waitExit[currentFloor]+1);
 				stop1 = false;
 				stop2=false;
+				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}else if(stop2) {
 			try {
+				if(doorOpen) {
 				waitOutside(Math.abs(( waitEntry[currentFloor]-load))+1);
 				stop1=false;
 				stop2 = false;
+				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		if(doorOpen) {
 		doorOpen=false;
 		view.closeDoors();
+		}
 	}
 	
 }
