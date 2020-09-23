@@ -111,10 +111,9 @@ public class Monitor {
 	}
 
 	public void checkCondition() {
+		concurrentWalkers();
 		stop1 = checkExiting(currentFloor);
 		stop2 = checkEntering(currentFloor);
-
-		concurrentWalkers();
 
 		if (stop1 && stop2) {
 			try {
