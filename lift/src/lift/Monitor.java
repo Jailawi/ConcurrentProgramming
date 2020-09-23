@@ -13,11 +13,20 @@ public class Monitor {
 	boolean stopLift = false;
 	private boolean stop, stop1, stop2 = false;
 	private boolean doorOpen;
+	int passengers;
 
 	public Monitor(LiftView view) {
 		waitEntry = new int[7];
 		waitExit = new int[7];
 		this.view = view;
+	}
+	
+	public  void isThereAPassenger() {
+		System.out.println("passengers: " + passengers);
+		while(passengers >= 1) {
+			moveUp();
+			moveDown();
+		}
 	}
 	
 	public synchronized int getNbrOfExiting(int floor) {
@@ -43,6 +52,7 @@ public class Monitor {
 			throws InterruptedException {
 
 		waitEntry[fromFloor] += 1;
+		passengers++;
 
 
 		while (fromFloor != currentFloor || load == 4 || !doorOpen) {
@@ -55,7 +65,9 @@ public class Monitor {
 		while (currentFloor != toFloor) {
 			wait();
 		}
+		
 		pass.exitLift();
+		passengers--;
 		load--;
 
 	}
@@ -63,10 +75,11 @@ public class Monitor {
 
 	public synchronized boolean checkEntering(int currentFloor) {
 		// System.out.println(waitEntry[currentFloor]);
-
+		view.showDebugInfo(waitEntry, waitExit);
 		if (waitEntry[currentFloor] > 0) {
-			this.currentFloor = currentFloor;
 			reportPassengerEnteredLift(currentFloor);
+
+			this.currentFloor = currentFloor;
 			return true;
 		}
 		return false;
@@ -99,10 +112,12 @@ public class Monitor {
 			}
 			stop1 = checkExiting(currentFloor);
 			stop2 = checkEntering(currentFloor);
-			if (stop1) {
+			if (stop1&&stop2) {
 				try {
+					//System.out.println("waitexit: " +waitExit[currentFloor]);
 					if(doorOpen) {
-					waitOutside(waitExit[currentFloor]+1);
+					waitOutside(Math.abs(( waitEntry[currentFloor]-load + waitExit[currentFloor]))+1);
+					
 					stop1 = false;
 					stop2=false;
 					}
@@ -114,6 +129,17 @@ public class Monitor {
 				try {
 					if(doorOpen) {
 					waitOutside(Math.abs(( waitEntry[currentFloor]-load))+1);
+					stop1=false;
+					stop2 = false;
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else if(stop1) {
+				try {
+					if(doorOpen) {
+					waitOutside(waitExit[currentFloor]+1);
 					stop2 = false;
 					stop1= false;
 					}
@@ -146,11 +172,12 @@ public class Monitor {
 		// checkExiting(currentFloor);
 		stop1 = checkExiting(currentFloor);
 		stop2 = checkEntering(currentFloor);
-		if (stop1) {
+		if (stop1&&stop2) {
 			try {
 				//System.out.println("waitexit: " +waitExit[currentFloor]);
 				if(doorOpen) {
-				waitOutside(waitExit[currentFloor]+1);
+				waitOutside(Math.abs(( waitEntry[currentFloor]-load + waitExit[currentFloor]))+1);
+				
 				stop1 = false;
 				stop2=false;
 				}
@@ -164,6 +191,17 @@ public class Monitor {
 				waitOutside(Math.abs(( waitEntry[currentFloor]-load))+1);
 				stop1=false;
 				stop2 = false;
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else if(stop1) {
+			try {
+				if(doorOpen) {
+				waitOutside(waitExit[currentFloor]+1);
+				stop2 = false;
+				stop1= false;
 				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block

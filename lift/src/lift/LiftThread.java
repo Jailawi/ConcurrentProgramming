@@ -20,8 +20,7 @@ public class LiftThread implements Runnable {
 	
 		while (true) {
 
-			m.moveUp();
-			m.moveDown();
+			m.isThereAPassenger();
 		
 		}
 	}

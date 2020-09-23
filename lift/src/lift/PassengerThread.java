@@ -12,8 +12,8 @@ public class PassengerThread implements Runnable {
 	@Override
 	public void run() {
 		while (true) {
-			// wait(4500);
 			try {
+				Thread.sleep(3000);
 				Passenger pass = liftView.createPassenger();
 				int fromFloor = pass.getStartFloor();
 				int toFloor = pass.getDestinationFloor();
