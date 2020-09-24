@@ -16,6 +16,7 @@ public class Monitor {
 	int passengers;
 	int numberOfConcurrentlyWalking;
 	boolean walking;
+	private int countWalkers;
 
 	public Monitor(LiftView view) {
 		waitEntry = new int[7];
@@ -26,33 +27,53 @@ public class Monitor {
 	public synchronized int getPassengers() {
 		return passengers;
 	}
-	
+
 	public synchronized void changeWalking(boolean a) {
-		walking=a;
+		walking = a;
 		notifyAll();
 	}
-	
+
+	private synchronized void handleErrors() {
+		if (waitExit[currentFloor] == 0) {
+			changeWalking(false);
+		}
+	}
+
+	private synchronized void incrementWalkers() {
+		// countWalkers = countWillEnter(currentFloor) + waitExit[currentFloor];
+		countWalkers++;
+		notifyAll();
+		// System.out.println("Current Walkers: " + countWalkers);
+	}
+
+	private synchronized void decrementWalkers() {
+		countWalkers--;
+
+		if (countWalkers == 0) {
+			notifyAll();
+		}
+
+		System.out.println("Current Walkers: " + countWalkers);
+
+	}
+
 	public void handleWalkers(int fromFloor, int toFloor, Passenger pass) throws InterruptedException {
 		pass.begin();
 		putPassengeInLift(fromFloor, toFloor, pass);
-		//changeWalking(true);
-
 		pass.enterLift();
-		
-		changeWalking(false);
+		decrementWalkers();
+
+		// handleErrors();
 		exitPassengerFromLift(fromFloor, toFloor, pass);
 		pass.exitLift();
-		changeWalking(false);
-		
+		decrementWalkers();
 		pass.end();
-		
-	}
-	
 
+	}
 
 	private synchronized void reportPassengerEnteredLift(int fromFloor) {
-		System.out.println("Waiting to Enter: " + waitEntry[fromFloor] + "\n");
-		System.out.println("Entered: " + countWillEnter(fromFloor));
+		// System.out.println("Waiting to Enter: " + waitEntry[fromFloor] + "\n");
+		// System.out.println("Entered: " + countWillEnter(fromFloor));
 		waitEntry[fromFloor] -= countWillEnter(fromFloor);
 		// view.showDebugInfo(waitEntry, waitExit);
 		notifyAll();
@@ -61,20 +82,18 @@ public class Monitor {
 	private synchronized void reportPassengerExitedLift(int toFloor) {
 		load -= waitExit[toFloor];
 		waitExit[toFloor] = 0;
-
-		// view.showDebugInfo(waitEntry, waitExit);
 		notifyAll();
 	}
 
 	public synchronized void putPassengeInLift(int fromFloor, int toFloor, Passenger pass) throws InterruptedException {
 		waitEntry[fromFloor] += 1;
 		passengers++;
+		view.showDebugInfo(waitEntry, waitExit);
 		while (fromFloor != currentFloor || load >= 4 || !doorOpen) {
 			wait();
 		}
-		//changeWalking(true);
+		// changeWalking(true);
 		waitExit[toFloor] += 1;
-
 		load++;
 		view.showDebugInfo(waitEntry, waitExit);
 	}
@@ -84,15 +103,16 @@ public class Monitor {
 		while (currentFloor != toFloor) {
 			wait();
 		}
+
 		passengers--;
 	}
 
 	private synchronized int countWillEnter(int currentFloor) {
 		int emptySpace = 4 - load;
 		int willEnter = 0;
-		if (waitEntry[currentFloor] > emptySpace) {
+		if (waitEntry[currentFloor] > emptySpace) { // om det finns fler som vill gå in än vad det finns ledig plats
 			willEnter = emptySpace;
-		} else if (waitEntry[currentFloor] < emptySpace) {
+		} else if (waitEntry[currentFloor] < emptySpace) { // om det finns mer ledig plats än vad som vill gå in
 			willEnter = waitEntry[currentFloor];
 		} else {
 			willEnter = emptySpace;
@@ -101,9 +121,9 @@ public class Monitor {
 	}
 
 	public synchronized boolean checkEntering(int currentFloor) {
-		// view.showDebugInfo(waitEntry, waitExit);
 		if (waitEntry[currentFloor] > 0) {
 			changeWalking(true);
+			countWalkers += countWillEnter(currentFloor);
 
 			reportPassengerEnteredLift(currentFloor);
 			return true;
@@ -112,126 +132,68 @@ public class Monitor {
 	}
 
 	public synchronized boolean checkExiting(int currentFloor) {
-
-		// System.out.println(waitExit[currentFloor]);
 		if (waitExit[currentFloor] > 0) {
 			changeWalking(true);
-
-			// System.out.println("passenger should exit here");
-			// this.currentFloor = currentFloor;
-			// System.out.println("Wants to exit: " + waitExit[currentFloor]);
-			// for (var i = 1; i <= waitExit[currentFloor]; i++) {
+			for (var i = 1; i <= waitExit[currentFloor]; i++) {
+				incrementWalkers();
+			}
 			reportPassengerExitedLift(currentFloor);
-			// }
 			return true;
 		}
 		return false;
-	}
-
-	private synchronized void waitOutside(int x) throws InterruptedException {
-		wait(2000 * x);
-		// 1250
-	}
-
-	private synchronized void concurrentWalkers(int currentFloor) {
-		// numberOfConcurrentlyWalking = waitExit[currentFloor] + 4 - (load -
-		// waitExit[currentFloor]);
-		int willEnter = countWillEnter(currentFloor);
-		numberOfConcurrentlyWalking = waitExit[currentFloor] + willEnter;
-		// System.out.println("CurrentWalkers " + numberOfConcurrentlyWalking);
 	}
 
 	public synchronized void checkCondition() throws InterruptedException {
 
 		stop1 = checkExiting(currentFloor);
 		stop2 = checkEntering(currentFloor);
-		concurrentWalkers(currentFloor);
-		System.out.println("walking: " + walking);
-		if(stop1||stop2) {
-			while(walking) {
+		// System.out.println("walking: " + walking);
+		if (stop1 || stop2) {
+			while (countWalkers != 0) {
 				wait();
-				System.out.println("im inside");
-
-			//}
-				walking=false;
-			System.out.println("im done");
-
+			}
+			// System.out.println("Good to go");
 		}
-		}
-		
+
 		/*
-
-		if (stop1 && stop2) {
-			try {
-				if (doorOpen) {
-					//waitOutside((numberOfConcurrentlyWalking) + 1);
-					while(walking) {
-						wait();
-					}
-					walking=false;
-					stop1 = false;
-					stop2 = false;
-					
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		} else if (stop2) {
-			try {
-				if (doorOpen) {
-				//	waitOutside(numberOfConcurrentlyWalking + 1);
-					while(walking) {
-						wait();
-					}
-					walking=false;
-
-					stop1 = false;
-					stop2 = false;
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		} else if (stop1) {
-			try {
-				if (doorOpen) {
-					//waitOutside(numberOfConcurrentlyWalking + 1);
-					while(walking) {
-						wait();
-					}
-						
-					walking=false;
-
-					stop2 = false;
-					stop1 = false;
-				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-*/
+		 * 
+		 * if (stop1 && stop2) { try { if (doorOpen) {
+		 * //waitOutside((numberOfConcurrentlyWalking) + 1); while(walking) { wait(); }
+		 * walking=false; stop1 = false; stop2 = false;
+		 * 
+		 * } } catch (InterruptedException e) { e.printStackTrace(); } } else if (stop2)
+		 * { try { if (doorOpen) { // waitOutside(numberOfConcurrentlyWalking + 1);
+		 * while(walking) { wait(); } walking=false;
+		 * 
+		 * stop1 = false; stop2 = false; } } catch (InterruptedException e) {
+		 * e.printStackTrace(); } } else if (stop1) { try { if (doorOpen) {
+		 * //waitOutside(numberOfConcurrentlyWalking + 1); while(walking) { wait(); }
+		 * 
+		 * walking=false;
+		 * 
+		 * stop2 = false; stop1 = false; } } catch (InterruptedException e) {
+		 * e.printStackTrace(); } }
+		 */
 	}
 
 	public void moveUp() throws InterruptedException {
 		for (int i = 0; i <= 5; i++) {
 			view.moveLift(currentFloor, currentFloor + 1);
 			currentFloor++;
-			
+
 			if (waitEntry[currentFloor] >= 1 && load <= 3 || waitExit[currentFloor] >= 1) {
 				view.openDoors(currentFloor);
-				doorOpen=true;
+				doorOpen = true;
 				checkCondition();
-
 			}
-			
-			
+
 			if (doorOpen) {
 				view.closeDoors();
 				doorOpen = false;
 
-				}
-	
-		}
+			}
 
+		}
 
 	}
 
@@ -243,15 +205,13 @@ public class Monitor {
 
 			if (waitEntry[currentFloor] >= 1 && load <= 3 || waitExit[currentFloor] >= 1) {
 				doorOpen = true;
-
 				view.openDoors(currentFloor);
-		
-
+				checkCondition();
 			}
-			checkCondition();
+
 			if (doorOpen) {
 				doorOpen = false;
-				
+
 				view.closeDoors();
 			}
 		}
