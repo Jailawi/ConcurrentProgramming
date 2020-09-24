@@ -17,6 +17,7 @@ public class PassengerThread implements Runnable {
 				Passenger pass = liftView.createPassenger();
 				int fromFloor = pass.getStartFloor();
 				int toFloor = pass.getDestinationFloor();
+				monitor.countPassengers(fromFloor);
 				pass.begin();
 				monitor.putPassengeInLift(fromFloor, toFloor, pass);
 				pass.enterLift();

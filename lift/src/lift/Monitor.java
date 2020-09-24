@@ -1,17 +1,17 @@
 package lift;
 
-import java.util.Arrays;
+
 
 public class Monitor {
 	boolean moving = true; // true if the lift is moving, false if standing still with doors open
 	int direction; // +1 if lift is going up, -1 if going down
 	int[] waitEntry; // number of passengers waiting to enter the lift at the various floors
 	int[] waitExit; // number of passengers (in lift) waiting to leave at the various floors
-	int load; // number of passengers currently in the lift
+    int load; // number of passengers currently in the lift
 	LiftView view;
 	int currentFloor = 0;
 	boolean stopLift = false;
-	private boolean stop, stop1, stop2 = false;
+	private boolean  stop1, stop2 = false;
 	private boolean doorOpen;
 	int passengers;
 	int numberOfConcurrentlyWalking;
@@ -33,24 +33,34 @@ public class Monitor {
 		notifyAll();
 	}
 
-	private synchronized void reportPassengerExitedLift(int fromFloor) {
-		waitExit[fromFloor] = 0;
+	private synchronized void reportPassengerExitedLift(int toFloor) {
+		waitExit[toFloor] =0;
 		// System.out.println("Wants to exit " + Arrays.toString(waitExit));
 
 		notifyAll();
 	}
+	
+	public synchronized void countPassengers(int fromFloor) {
+		waitEntry[fromFloor] += 1;
+	}
+	
+	
 
 	public synchronized void putPassengeInLift(int fromFloor, int toFloor, Passenger pass) throws InterruptedException {
-		waitEntry[fromFloor] += 1;
+		
 		passengers++;
-		while (fromFloor != currentFloor || load == 4 || !doorOpen) {
+		//int newLoad=load-waitExit[fromFloor];
+		//System.out.println("floornumber: " + fromFloor +" newLoad: " + newLoad +"currenload: " + load + "wanna exit: " + waitExit[fromFloor]);
+		while (fromFloor != currentFloor || load >=4 || !doorOpen) {
 			wait();
 		}
 		waitExit[toFloor] += 1;
 
 		load++;
-		view.showDebugInfo(waitEntry, waitExit);
+		//view.showDebugInfo(waitEntry, waitExit);
 	}
+	
+	
 
 	public synchronized void exitPassengerFromLift(int fromFloor, int toFloor, Passenger pass)
 			throws InterruptedException {
@@ -65,7 +75,7 @@ public class Monitor {
 	public synchronized boolean checkEntering(int currentFloor) {
 		// view.showDebugInfo(waitEntry, waitExit);
 		if (waitEntry[currentFloor] > 0) {
-			this.currentFloor = currentFloor;
+		//	this.currentFloor = currentFloor;
 			for (var i = 1; i <= waitEntry[currentFloor]; i++) {
 				reportPassengerEnteredLift(currentFloor);
 			}
@@ -80,7 +90,7 @@ public class Monitor {
 		// System.out.println(waitExit[currentFloor]);
 		if (waitExit[currentFloor] > 0) {
 			// System.out.println("passenger should exit here");
-			this.currentFloor = currentFloor;
+			//this.currentFloor = currentFloor;
 			System.out.println("Wants to exit: " + waitExit[currentFloor]);
 			// for (var i = 1; i <= waitExit[currentFloor]; i++) {
 			reportPassengerExitedLift(currentFloor);
@@ -167,12 +177,15 @@ public class Monitor {
 			if (doorOpen) {
 				doorOpen = false;
 				view.closeDoors();
+				view.showDebugInfo(waitEntry, waitExit);
+
 			}
 		}
 
 	}
 
 	public void moveDown() {
+		//view.showDebugInfo(waitEntry, waitExit);
 		for (int i = 5; i >= 0; i--) {
 			view.moveLift(currentFloor, currentFloor - 1);
 			currentFloor--;
