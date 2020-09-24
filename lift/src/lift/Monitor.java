@@ -76,9 +76,9 @@ public class Monitor {
 		// view.showDebugInfo(waitEntry, waitExit);
 		if (waitEntry[currentFloor] > 0) {
 		//	this.currentFloor = currentFloor;
-			for (var i = 1; i <= waitEntry[currentFloor]; i++) {
+			//for (var i = 1; i <= waitEntry[currentFloor]; i++) {
 				reportPassengerEnteredLift(currentFloor);
-			}
+			//}
 
 			return true;
 		}
