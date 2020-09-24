@@ -17,12 +17,16 @@ public class LiftThread implements Runnable {
 
 		while (true) {
 
-			if (m.getPassengers() >= 1) {
-				m.moveUp();
-				m.moveDown();
+			try {
+				if (m.getPassengers() >= 1) {
+					m.moveUp();
+					m.moveDown();
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-
 		}
-	}
 
+	}
 }
