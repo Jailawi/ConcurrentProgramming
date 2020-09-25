@@ -84,6 +84,7 @@ public class Monitor {
 
 	private synchronized boolean checkEntering(int currentFloor) {
 		if (waitEntry[currentFloor] > 0) {
+			setWalking(true);
 			reportPassengerEnteredLift(currentFloor);
 			return true;
 		}
@@ -92,6 +93,7 @@ public class Monitor {
 
 	private synchronized boolean checkExiting(int currentFloor) {
 		if (waitExit[currentFloor] > 0) {
+			setWalking(true);
 			reportPassengerExitedLift(currentFloor);
 			return true;
 		}
@@ -102,7 +104,7 @@ public class Monitor {
 		stop1 = checkExiting(currentFloor);
 		stop2 = checkEntering(currentFloor);
 		if (stop1 || stop2) {
-			walking = true;
+			//walking = true;
 			while (walking) {
 				wait();
 			}

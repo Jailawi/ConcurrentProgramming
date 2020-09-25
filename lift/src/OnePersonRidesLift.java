@@ -6,7 +6,7 @@ import lift.Passenger;
 import lift.PassengerThread;
 
 public class OnePersonRidesLift {
-
+ 
     public static void main(String[] args) {
         LiftView view = new LiftView();
         Monitor monitor = new Monitor(view);
