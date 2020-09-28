@@ -7,6 +7,8 @@ import java.math.BigInteger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 /**
@@ -16,6 +18,7 @@ import javax.swing.JTextArea;
  */
 @SuppressWarnings("serial")
 public class WorklistItem extends ConvenientPanel {
+	private JButton b;
 
     public static final int HEIGHT = 100;
     
@@ -34,11 +37,20 @@ public class WorklistItem extends ConvenientPanel {
         textArea.setForeground(Color.GREEN);
         textArea.setLineWrap(true);
         textArea.setEditable(false);
+        
+    	 b = new JButton("Haiwan");
 
         add(textArea);
+        add(b);
 
         // make sure this component shrinks and grows as needed
         setPreferredSize(new Dimension(0, HEIGHT));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, HEIGHT));
     }
+    
+    public JButton getButton(){
+    	return b;
+    }
+    
+  
 }

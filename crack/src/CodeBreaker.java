@@ -1,10 +1,14 @@
+import java.awt.LayoutManager;
 import java.math.BigInteger;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
+import client.view.ProgressItem;
 import client.view.StatusWindow;
+import client.view.WorklistItem;
 import network.Sniffer;
 import network.SnifferCallback;
 
@@ -28,7 +32,7 @@ public class CodeBreaker implements SnifferCallback {
     // -----------------------------------------------------------------------
     
     public static void main(String[] args) {
-
+    
         /*
          * Most Swing operations (such as creating view elements) must be performed in
          * the Swing EDT (Event Dispatch Thread).
@@ -39,6 +43,7 @@ public class CodeBreaker implements SnifferCallback {
         SwingUtilities.invokeLater(() -> {
             CodeBreaker codeBreaker = new CodeBreaker();
             new Sniffer(codeBreaker).start();
+            
         });
     }
 
@@ -47,6 +52,15 @@ public class CodeBreaker implements SnifferCallback {
     /** Called by a Sniffer thread when an encrypted message is obtained. */
     @Override
     public void onMessageIntercepted(String message, BigInteger n) {
-        System.out.println("message intercepted (N=" + n + ")...");
+    	WorklistItem workItem= new WorklistItem(n, message);
+    	workList.add(workItem);
+    	
+    	workItem.getButton().addActionListener(e -> {
+    		workList.remove(workItem);
+    		ProgressItem progressItem= new ProgressItem(n, message);
+    		progressList.add(progressItem);
+    	});
+    
+       // System.out.println("message intercepted (N=" + n + ")...");
     }
 }
