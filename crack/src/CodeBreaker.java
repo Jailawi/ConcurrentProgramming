@@ -1,5 +1,8 @@
 import java.awt.LayoutManager;
 import java.math.BigInteger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -58,21 +61,40 @@ public class CodeBreaker implements SnifferCallback {
 	@Override
 	public void onMessageIntercepted(String message, BigInteger n) {
 		WorklistItem workItem = new WorklistItem(n, message);
+		ProgressItem progressItem = new ProgressItem(n, message);
 		workList.add(workItem);
 
-		workItem.getButton().addActionListener(e -> {
-
+		
+		
+		Runnable decryptTask = () -> {
 			try {
-				workList.remove(workItem);
-				ProgressItem progressItem = new ProgressItem(n, message);
-				progressList.add(progressItem);
-				ProgressTracker tracker = new Tracker();
+				Tracker tracker = new Tracker();
 				String plaintext = Factorizer.crack(message, n, tracker);
-				System.out.println("da message for da beople: " + plaintext);
+				
+				progressItem.getTextArea().setText(plaintext);
+			
+				
+				/*
+				progressItem.getProgressBar().setMaximumSize(progressItem.getMaximumSize());
+				progressItem.getProgressBar().setValue(tracker.getPercentage());
+				progressItem.getProgressBar().setStringPainted(true);
+				progressItem.getProgressBar().update(progressItem.getProgressBar().getGraphics());
+				*/
+				//System.out.println("da message for da beople: " + plaintext);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+
+		};
+
+		ExecutorService pool = Executors.newFixedThreadPool(2);
+		pool.submit(decryptTask);
+
+		workItem.getButton().addActionListener(e -> {
+			workList.remove(workItem);
+			progressList.add(progressItem);
+			
 		});
 
 		// System.out.println("message intercepted (N=" + n + ")...");
@@ -85,6 +107,10 @@ class Tracker implements ProgressTracker {
 	@Override
 	public void onProgress(int ppmDelta) {
 		totalProgress += ppmDelta;
-		System.out.println("progress = " + totalProgress + "/1000000");
+		System.out.println("progress = " + totalProgress/10000);
+	}
+	
+	public int getPercentage() {
+		return totalProgress/10000;
 	}
 }
