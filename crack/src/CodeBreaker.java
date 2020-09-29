@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -62,25 +63,24 @@ public class CodeBreaker implements SnifferCallback {
 	public void onMessageIntercepted(String message, BigInteger n) {
 		WorklistItem workItem = new WorklistItem(n, message);
 		ProgressItem progressItem = new ProgressItem(n, message);
+
 		workList.add(workItem);
 
-		
-		
 		Runnable decryptTask = () -> {
 			try {
-				Tracker tracker = new Tracker();
+				Tracker tracker = new Tracker(progressItem, mainProgressBar);
 				String plaintext = Factorizer.crack(message, n, tracker);
-				
 				progressItem.getTextArea().setText(plaintext);
-			
-				
-				/*
-				progressItem.getProgressBar().setMaximumSize(progressItem.getMaximumSize());
-				progressItem.getProgressBar().setValue(tracker.getPercentage());
-				progressItem.getProgressBar().setStringPainted(true);
-				progressItem.getProgressBar().update(progressItem.getProgressBar().getGraphics());
-				*/
-				//System.out.println("da message for da beople: " + plaintext);
+
+				JButton removeButton = new JButton("Remove");
+				progressItem.add(removeButton);
+
+				removeButton.addActionListener(e -> {
+					progressList.remove(progressItem);
+					mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
+					mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
+				});
+
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -89,12 +89,14 @@ public class CodeBreaker implements SnifferCallback {
 		};
 
 		ExecutorService pool = Executors.newFixedThreadPool(2);
-		pool.submit(decryptTask);
 
-		workItem.getButton().addActionListener(e -> {
+		JButton breakButton = new JButton("Break");
+		workItem.add(breakButton);
+		breakButton.addActionListener(e -> {
 			workList.remove(workItem);
 			progressList.add(progressItem);
-			
+			mainProgressBar.setMaximum(mainProgressBar.getMaximum() + 1000000);
+			pool.submit(decryptTask);
 		});
 
 		// System.out.println("message intercepted (N=" + n + ")...");
@@ -103,14 +105,23 @@ public class CodeBreaker implements SnifferCallback {
 
 class Tracker implements ProgressTracker {
 	private int totalProgress = 0;
+	private ProgressItem progressItem;
+	private JProgressBar mainProgressBar;
+
+	public Tracker(ProgressItem progressItem, JProgressBar mainProgressBar) {
+		this.progressItem = progressItem;
+		this.mainProgressBar = mainProgressBar;
+	}
 
 	@Override
 	public void onProgress(int ppmDelta) {
 		totalProgress += ppmDelta;
-		System.out.println("progress = " + totalProgress/10000);
+		SwingUtilities.invokeLater(() -> mainProgressBar.setValue(mainProgressBar.getValue() + ppmDelta));
+		SwingUtilities.invokeLater(() -> progressItem.getProgressBar().setValue(totalProgress));
 	}
-	
+
 	public int getPercentage() {
-		return totalProgress/10000;
+		return totalProgress / 10000;
 	}
+
 }

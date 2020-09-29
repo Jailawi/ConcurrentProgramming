@@ -18,39 +18,37 @@ import javax.swing.JTextArea;
  */
 @SuppressWarnings("serial")
 public class WorklistItem extends ConvenientPanel {
-	private JButton b;
+    private JButton b;
 
     public static final int HEIGHT = 100;
-    
+
     private static final Font MESSAGE_FONT = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 
-    /** Create the panel, displaying the integer _n_ and the encrypted message _code_. */
+    /**
+     * Create the panel, displaying the integer _n_ and the encrypted message
+     * _code_.
+     */
     public WorklistItem(BigInteger n, String code) {
         setBorder(BorderFactory.createTitledBorder("N=" + n + " (" + n.bitLength() + " bits)"));
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         JTextArea textArea = new JTextArea(code);
-        textArea.setPreferredSize(new Dimension());  // make sure it shrinks as needed
+        textArea.setPreferredSize(new Dimension()); // make sure it shrinks as needed
         textArea.setFont(MESSAGE_FONT);
         textArea.setBackground(Color.BLACK);
         textArea.setForeground(Color.GREEN);
         textArea.setLineWrap(true);
         textArea.setEditable(false);
-        
-    	 b = new JButton("Haiwan");
 
         add(textArea);
-        add(b);
-
         // make sure this component shrinks and grows as needed
         setPreferredSize(new Dimension(0, HEIGHT));
         setMaximumSize(new Dimension(Integer.MAX_VALUE, HEIGHT));
     }
-    
-    public JButton getButton(){
-    	return b;
+
+    public JButton getButton() {
+        return b;
     }
-    
-  
+
 }
