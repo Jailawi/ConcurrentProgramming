@@ -66,78 +66,60 @@ public class CodeBreaker implements SnifferCallback {
 		JButton removeButton = new JButton("Remove");
 		JButton cancelButton = new JButton("cancel");
 
-
 		workList.add(workItem);
 
 		Runnable decryptTask = () -> {
 			try {
-				
+
 				Tracker tracker = new Tracker(progressItem, mainProgressBar);
 				String plaintext = Factorizer.crack(message, n, tracker);
 				progressItem.getTextArea().setText(plaintext);
 				progressItem.add(removeButton);
 				progressItem.remove(cancelButton);
-				
 
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+				progressItem.getProgressBar().setValue(1000000);
 			}
 
 		};
-		
-		
 
 		ExecutorService pool = Executors.newFixedThreadPool(2);
 
-		SwingUtilities.invokeLater(()->{
+		// SwingUtilities.invokeLater(() -> {
 		JButton breakButton = new JButton("Break");
 		workItem.add(breakButton);
-		
-		
+
 		breakButton.addActionListener(e -> {
 			workList.remove(workItem);
 			progressList.add(progressItem);
 			mainProgressBar.setMaximum(mainProgressBar.getMaximum() + 1000000);
-			
-			
+
 			removeButton.addActionListener(c -> {
 				progressList.remove(progressItem);
 				mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
 				mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
 			});
-			
-			
+
 			Future future = pool.submit(decryptTask);
 
-			
 			cancelButton.addActionListener(a -> {
-				if(future.cancel(true)){
-					progressItem.add(removeButton);
-					progressItem.getTextArea().setText("[CANCELLED]");
-					progressItem.getProgressBar().setValue(1000000);
-					mainProgressBar.setValue(mainProgressBar.getValue() + 1000000);
-					progressItem.remove(cancelButton);
-				}
-			});
-			
+				future.cancel(true);
+				progressItem.remove(cancelButton);
+				progressItem.add(removeButton);
+				progressItem.getTextArea().setText("[CANCELLED]");
+				SwingUtilities.invokeLater(() -> {
+					progressItem.getProgressBar().setValue(10000000);
+				});
 
-			   
-			       progressItem.add(cancelButton);
-			   
-				
-				
-			
-			
-		
-			
+				// mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
+
+			});
+
+			progressItem.add(cancelButton);
+
 		});
-			
-			
-		});
-		
-		
-		
+
+		// });
 
 		// System.out.println("message intercepted (N=" + n + ")...");
 	}
@@ -159,7 +141,5 @@ class Tracker implements ProgressTracker {
 		SwingUtilities.invokeLater(() -> mainProgressBar.setValue(mainProgressBar.getValue() + ppmDelta));
 		SwingUtilities.invokeLater(() -> progressItem.getProgressBar().setValue(totalProgress));
 	}
-
-
 
 }
