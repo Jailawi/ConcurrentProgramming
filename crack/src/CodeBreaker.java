@@ -63,6 +63,9 @@ public class CodeBreaker implements SnifferCallback {
 	public void onMessageIntercepted(String message, BigInteger n) {
 		WorklistItem workItem = new WorklistItem(n, message);
 		ProgressItem progressItem = new ProgressItem(n, message);
+		JButton removeButton = new JButton("Remove");
+		JButton cancelButton = new JButton("cancel");
+
 
 		workList.add(workItem);
 
@@ -72,10 +75,8 @@ public class CodeBreaker implements SnifferCallback {
 				Tracker tracker = new Tracker(progressItem, mainProgressBar);
 				String plaintext = Factorizer.crack(message, n, tracker);
 				progressItem.getTextArea().setText(plaintext);
-				SwingUtilities.invokeLater(()->{
-			
-				
-				});
+				progressItem.add(removeButton);
+				progressItem.remove(cancelButton);
 				
 
 			} catch (InterruptedException e1) {
@@ -90,38 +91,42 @@ public class CodeBreaker implements SnifferCallback {
 		ExecutorService pool = Executors.newFixedThreadPool(2);
 
 		SwingUtilities.invokeLater(()->{
-				JButton breakButton = new JButton("Break");
+		JButton breakButton = new JButton("Break");
 		workItem.add(breakButton);
+		
+		
 		breakButton.addActionListener(e -> {
 			workList.remove(workItem);
 			progressList.add(progressItem);
 			mainProgressBar.setMaximum(mainProgressBar.getMaximum() + 1000000);
 			
-			JButton removeButton = new JButton("Remove");
-			progressItem.add(removeButton);
 			
 			removeButton.addActionListener(c -> {
 				progressList.remove(progressItem);
 				mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
 				mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
 			});
-		
+			
 			
 			Future future = pool.submit(decryptTask);
-		   
+
 			
-			
-			JButton cancelButton = new JButton("cancel");
-			progressItem.add(cancelButton);
 			cancelButton.addActionListener(a -> {
 				if(future.cancel(true)){
+					progressItem.add(removeButton);
 					progressItem.getTextArea().setText("[CANCELLED]");
 					progressItem.getProgressBar().setValue(1000000);
 					mainProgressBar.setValue(mainProgressBar.getValue() + 1000000);
-
 					progressItem.remove(cancelButton);
 				}
 			});
+			
+
+			   
+			       progressItem.add(cancelButton);
+			   
+				
+				
 			
 			
 		
