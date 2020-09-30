@@ -1,5 +1,6 @@
 import java.awt.LayoutManager;
 import java.math.BigInteger;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -17,7 +18,6 @@ import network.Sniffer;
 import network.SnifferCallback;
 import rsa.Factorizer;
 import rsa.ProgressTracker;
-
 import rsa.Factorizer;
 import rsa.ProgressTracker;
 
@@ -68,18 +68,15 @@ public class CodeBreaker implements SnifferCallback {
 
 		Runnable decryptTask = () -> {
 			try {
+				
 				Tracker tracker = new Tracker(progressItem, mainProgressBar);
 				String plaintext = Factorizer.crack(message, n, tracker);
 				progressItem.getTextArea().setText(plaintext);
-
-				JButton removeButton = new JButton("Remove");
-				progressItem.add(removeButton);
-
-				removeButton.addActionListener(e -> {
-					progressList.remove(progressItem);
-					mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
-					mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
+				SwingUtilities.invokeLater(()->{
+			
+				
 				});
+				
 
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
@@ -87,17 +84,55 @@ public class CodeBreaker implements SnifferCallback {
 			}
 
 		};
+		
+		
 
 		ExecutorService pool = Executors.newFixedThreadPool(2);
 
-		JButton breakButton = new JButton("Break");
+		SwingUtilities.invokeLater(()->{
+				JButton breakButton = new JButton("Break");
 		workItem.add(breakButton);
 		breakButton.addActionListener(e -> {
 			workList.remove(workItem);
 			progressList.add(progressItem);
 			mainProgressBar.setMaximum(mainProgressBar.getMaximum() + 1000000);
-			pool.submit(decryptTask);
+			
+			JButton removeButton = new JButton("Remove");
+			progressItem.add(removeButton);
+			
+			removeButton.addActionListener(c -> {
+				progressList.remove(progressItem);
+				mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
+				mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
+			});
+		
+			
+			Future future = pool.submit(decryptTask);
+		   
+			
+			
+			JButton cancelButton = new JButton("cancel");
+			progressItem.add(cancelButton);
+			cancelButton.addActionListener(a -> {
+				if(future.cancel(true)){
+					progressItem.getTextArea().setText("[CANCELLED]");
+					progressItem.getProgressBar().setValue(1000000);
+					mainProgressBar.setValue(mainProgressBar.getValue() + 1000000);
+
+					progressItem.remove(cancelButton);
+				}
+			});
+			
+			
+		
+			
 		});
+			
+			
+		});
+		
+		
+		
 
 		// System.out.println("message intercepted (N=" + n + ")...");
 	}
@@ -120,8 +155,6 @@ class Tracker implements ProgressTracker {
 		SwingUtilities.invokeLater(() -> progressItem.getProgressBar().setValue(totalProgress));
 	}
 
-	public int getPercentage() {
-		return totalProgress / 10000;
-	}
+
 
 }
