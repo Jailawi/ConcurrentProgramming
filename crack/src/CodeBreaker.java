@@ -27,6 +27,7 @@ public class CodeBreaker implements SnifferCallback {
 	private final JPanel progressList;
 
 	private final JProgressBar mainProgressBar;
+	private ExecutorService pool;
 
 	// -----------------------------------------------------------------------
 
@@ -36,6 +37,7 @@ public class CodeBreaker implements SnifferCallback {
 		workList = w.getWorkList();
 		progressList = w.getProgressList();
 		mainProgressBar = w.getProgressBar();
+		pool = Executors.newFixedThreadPool(2);
 	}
 
 	// -----------------------------------------------------------------------
@@ -83,43 +85,42 @@ public class CodeBreaker implements SnifferCallback {
 
 		};
 
-		ExecutorService pool = Executors.newFixedThreadPool(2);
+		SwingUtilities.invokeLater(() -> {
+			JButton breakButton = new JButton("Break");
+			workItem.add(breakButton);
 
-		// SwingUtilities.invokeLater(() -> {
-		JButton breakButton = new JButton("Break");
-		workItem.add(breakButton);
+			breakButton.addActionListener(e -> {
+				workList.remove(workItem);
+				progressList.add(progressItem);
+				mainProgressBar.setMaximum(mainProgressBar.getMaximum() + 1000000);
 
-		breakButton.addActionListener(e -> {
-			workList.remove(workItem);
-			progressList.add(progressItem);
-			mainProgressBar.setMaximum(mainProgressBar.getMaximum() + 1000000);
-
-			removeButton.addActionListener(c -> {
-				progressList.remove(progressItem);
-				mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
-				mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
-			});
-
-			Future future = pool.submit(decryptTask);
-
-			cancelButton.addActionListener(a -> {
-				future.cancel(true);
-				progressItem.remove(cancelButton);
-				progressItem.add(removeButton);
-				progressItem.getTextArea().setText("[CANCELLED]");
-				SwingUtilities.invokeLater(() -> {
-					progressItem.getProgressBar().setValue(10000000);
+				removeButton.addActionListener(c -> {
+					progressList.remove(progressItem);
+					mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
+					mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
 				});
 
-				// mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
+				Future future = pool.submit(decryptTask);
+
+				cancelButton.addActionListener(a -> {
+					int soFar = progressItem.getProgressBar().getValue();
+					future.cancel(true);
+					progressItem.remove(cancelButton);
+					progressItem.add(removeButton);
+					progressItem.getTextArea().setText("[CANCELLED]");
+					mainProgressBar.setMaximum(
+							mainProgressBar.getMaximum() - (progressItem.getProgressBar().getMaximum() - soFar));
+					SwingUtilities.invokeLater(() -> {
+						progressItem.getProgressBar().setValue(1000000);
+					});
+
+				});
+
+				progressItem.add(cancelButton);
 
 			});
 
-			progressItem.add(cancelButton);
-
 		});
-
-		// });
 
 		// System.out.println("message intercepted (N=" + n + ")...");
 	}
