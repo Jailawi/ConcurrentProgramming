@@ -51,11 +51,9 @@ public class CodeBreaker implements SnifferCallback {
 		 * That's what SwingUtilities.invokeLater is for.
 		 */
 
-		SwingUtilities.invokeLater(() -> {
-			CodeBreaker codeBreaker = new CodeBreaker();
-			new Sniffer(codeBreaker).start();
+		CodeBreaker codeBreaker = new CodeBreaker();
+		new Sniffer(codeBreaker).start();
 
-		});
 	}
 
 	// -----------------------------------------------------------------------
@@ -63,66 +61,71 @@ public class CodeBreaker implements SnifferCallback {
 	/** Called by a Sniffer thread when an encrypted message is obtained. */
 	@Override
 	public void onMessageIntercepted(String message, BigInteger n) {
-		WorklistItem workItem = new WorklistItem(n, message);
-		ProgressItem progressItem = new ProgressItem(n, message);
-		JButton removeButton = new JButton("Remove");
-		JButton cancelButton = new JButton("cancel");
-
-		workList.add(workItem);
-
-		Runnable decryptTask = () -> {
-			try {
-
-				Tracker tracker = new Tracker(progressItem, mainProgressBar);
-				String plaintext = Factorizer.crack(message, n, tracker);
-				progressItem.getTextArea().setText(plaintext);
-				progressItem.add(removeButton);
-				progressItem.remove(cancelButton);
-
-			} catch (InterruptedException e1) {
-				progressItem.getProgressBar().setValue(1000000);
-			}
-
-		};
-
 		SwingUtilities.invokeLater(() -> {
-			JButton breakButton = new JButton("Break");
-			workItem.add(breakButton);
+			WorklistItem workItem = new WorklistItem(n, message);
+			ProgressItem progressItem = new ProgressItem(n, message);
+			JButton removeButton = new JButton("Remove");
+			JButton cancelButton = new JButton("cancel");
 
-			breakButton.addActionListener(e -> {
-				workList.remove(workItem);
-				progressList.add(progressItem);
-				mainProgressBar.setMaximum(mainProgressBar.getMaximum() + 1000000);
+			workList.add(workItem);
 
-				removeButton.addActionListener(c -> {
-					progressList.remove(progressItem);
-					mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
-					mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
-				});
-
-				Future future = pool.submit(decryptTask);
-
-				cancelButton.addActionListener(a -> {
-					int soFar = progressItem.getProgressBar().getValue();
-					future.cancel(true);
-					progressItem.remove(cancelButton);
-					progressItem.add(removeButton);
-					progressItem.getTextArea().setText("[CANCELLED]");
-					mainProgressBar.setMaximum(
-							mainProgressBar.getMaximum() - (progressItem.getProgressBar().getMaximum() - soFar));
+			Runnable decryptTask = () -> {
+				try {
+					Tracker tracker = new Tracker(progressItem, mainProgressBar);
+					String plaintext = Factorizer.crack(message, n, tracker);
 					SwingUtilities.invokeLater(() -> {
-						progressItem.getProgressBar().setValue(1000000);
+						progressItem.getTextArea().setText(plaintext);
+						progressItem.add(removeButton);
+						progressItem.remove(cancelButton);
 					});
 
-				});
+				} catch (InterruptedException e1) {
+					progressItem.getProgressBar().setValue(1000000);
+				}
 
-				progressItem.add(cancelButton);
+			};
+
+			SwingUtilities.invokeLater(() -> {
+				JButton breakButton = new JButton("Break");
+				workItem.add(breakButton);
+
+				breakButton.addActionListener(e -> {
+					workList.remove(workItem);
+					progressList.add(progressItem);
+					mainProgressBar.setMaximum(mainProgressBar.getMaximum() + 1000000);
+
+					removeButton.addActionListener(c -> {
+						progressList.remove(progressItem);
+						mainProgressBar.setValue(mainProgressBar.getValue() - 1000000);
+						mainProgressBar.setMaximum(mainProgressBar.getMaximum() - 1000000);
+					});
+
+					Future future = pool.submit(decryptTask);
+
+					cancelButton.addActionListener(a -> {
+						SwingUtilities.invokeLater(() -> {
+							int soFar = progressItem.getProgressBar().getValue();
+							future.cancel(true);
+							progressItem.remove(cancelButton);
+							progressItem.add(removeButton);
+							progressItem.getTextArea().setText("[CANCELLED]");
+							mainProgressBar.setMaximum(mainProgressBar.getMaximum()
+									- (progressItem.getProgressBar().getMaximum() - soFar));
+
+							progressItem.getProgressBar().setValue(1000000);
+						});
+
+					});
+
+					progressItem.add(cancelButton);
+
+				});
 
 			});
 
+			// System.out.println("message intercepted (N=" + n + ")...");
 		});
 
-		// System.out.println("message intercepted (N=" + n + ")...");
 	}
 }
 
