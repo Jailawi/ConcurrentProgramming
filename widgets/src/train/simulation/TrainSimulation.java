@@ -1,10 +1,6 @@
 package train.simulation;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
-
 import train.model.Monitor;
 import train.model.Route;
 import train.model.Segment;
@@ -40,7 +36,6 @@ public class TrainSimulation {
 					m.move(route, train);
 					;
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

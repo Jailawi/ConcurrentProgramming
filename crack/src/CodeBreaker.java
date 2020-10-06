@@ -1,11 +1,8 @@
-import java.awt.LayoutManager;
 import java.math.BigInteger;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -16,8 +13,6 @@ import client.view.StatusWindow;
 import client.view.WorklistItem;
 import network.Sniffer;
 import network.SnifferCallback;
-import rsa.Factorizer;
-import rsa.ProgressTracker;
 import rsa.Factorizer;
 import rsa.ProgressTracker;
 

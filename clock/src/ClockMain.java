@@ -1,4 +1,3 @@
-import java.util.concurrent.Semaphore;
 
 import clock.AlarmClockEmulator;
 import clock.io.AlarmHandler;

@@ -14,5 +14,6 @@ public class TemperatureController extends ActorThread<WashingMessage> {
     @Override
     public void run() {
         // TODO
+
     }
 }

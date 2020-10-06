@@ -7,7 +7,7 @@ public class AlarmHandler implements Runnable {
     private ClockOutput out;
     private boolean on = false;
     private Clock clock;
-    private Semaphore sem = new Semaphore(1); 
+    private Semaphore sem = new Semaphore(1);
 
     public AlarmHandler(ClockOutput out, Clock clock) {
         this.out = out;
@@ -26,10 +26,9 @@ public class AlarmHandler implements Runnable {
         out.setAlarmIndicator(indicator);
         on = indicator;
     }
-    
+
     public boolean isOn() throws InterruptedException {
-    	boolean b= on;
-    	return on;
+        return on;
     }
 
     public void alarmBeep() {
@@ -52,8 +51,6 @@ public class AlarmHandler implements Runnable {
         }
 
     }
-    
-    
 
     public void checkAlarm() throws InterruptedException {
         sem.acquire();

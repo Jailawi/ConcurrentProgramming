@@ -34,7 +34,6 @@ public class LabToolController implements ToolController {
     @Override
     public synchronized void onPressSensorHigh(WidgetKind widgetKind) throws InterruptedException {
         //
-        // TODO: you will need to modify this method.
         //
         // Note that this method can be called concurrently with onPaintSensorHigh
         // (that is, in a separate thread).

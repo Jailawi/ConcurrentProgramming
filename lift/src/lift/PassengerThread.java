@@ -1,7 +1,5 @@
 package lift;
 
-import java.util.HashSet;
-
 public class PassengerThread implements Runnable {
 	private Monitor monitor;
 	private LiftView liftView;

@@ -1,14 +1,16 @@
 package wash.control;
+
+import actor.ActorThread;
 import wash.io.WashingIO;
 import wash.simulation.WashingSimulator;
 
 public class Wash {
+    private static ActorThread<WashingMessage> program;
 
     public static void main(String[] args) throws InterruptedException {
-        WashingSimulator sim = new WashingSimulator(Settings.SPEEDUP);
-        
-        WashingIO io = sim.startSimulation();
 
+        WashingSimulator sim = new WashingSimulator(Settings.SPEEDUP);
+        WashingIO io = sim.startSimulation();
         TemperatureController temp = new TemperatureController(io);
         WaterController water = new WaterController(io);
         SpinController spin = new SpinController(io);
@@ -20,10 +22,22 @@ public class Wash {
         while (true) {
             int n = io.awaitButton();
             System.out.println("user selected program " + n);
+            if (n == 0) {
+                program.interrupt();
+            }
+            if (n == 1) {
+                program = new WashingProgram1(io, temp, water, spin);
+                program.start();
+            }
+            // TODO if (n == 2) {
 
-            // TODO:
-            // if the user presses buttons 1-3, start a washing program
-            // if the user presses button 0, and a program has been started, stop it
+            // }
+
+            if (n == 3) {
+                program = new WashingProgram3(io, temp, water, spin);
+                program.start();
+            }
+
         }
     }
 };
