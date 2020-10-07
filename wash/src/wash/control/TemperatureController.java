@@ -17,37 +17,38 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 	public void run() {
 
 		try {
+			WashingMessage prev=null;
 			while (true) {
 
-				WashingMessage m = receiveWithTimeout(10000/ Settings.SPEEDUP);
+				WashingMessage m = receiveWithTimeout(dt * 1000/ Settings.SPEEDUP);
 				if (m != null) {
 					// The thread that sent the message
-					program = m.getSender();
+					//program = m.getSender();
+					prev=m;
 				}
 
-				while (program != null) {
-					switch (m.getCommand()) {
+				if (prev != null) {
+					switch (prev.getCommand()) {
 					case WashingMessage.TEMP_IDLE: {
 						io.heat(false);
 						break;
 					}
 
 					case WashingMessage.TEMP_SET: {
-						double tempWeWant = m.getValue();
-						double lowerMargin = dt * 9.52 * 0.001;
-						double upperMargin = dt * 0.0478;
-						// måste kolla matten igen
-						if (io.getTemperature() - upperMargin < tempWeWant) {
+						double tempWeWant = prev.getValue();
+						double lowerMargin = 0.6;
+						double upperMargin = 0.3;
+						if (io.getTemperature() + upperMargin < tempWeWant-2) {
 							io.heat(true);
+							
 
-						} else {
+						} else if(io.getTemperature()+lowerMargin >tempWeWant ){
 							io.heat(false);
-							break;
+							
 						}
+						break;
 					}
-					 default:
-                     //    System.out.println("Invalid command try again");
-
+					 
 					}
 				}
 

@@ -47,7 +47,8 @@ every minute. While centrifuging, the drain pump should run to evacuate excess w
             System.out.println("setting SPIN_SLOW...");
             spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
             System.out.println("Heating to 40");
-            temp.send(new WashingMessage(this, WashingMessage.TEMP_SET,39));
+            temp.send(new WashingMessage(this, WashingMessage.TEMP_SET,40));
+            //gör receive
             //Keep the temp for 30min
             Thread.sleep(30 * 60000 / Settings.SPEEDUP);
             temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
