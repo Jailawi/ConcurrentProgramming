@@ -18,6 +18,7 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
     private ActorThread<WashingMessage> temp;
     private ActorThread<WashingMessage> water;
     private ActorThread<WashingMessage> spin;
+    private WashingMessage ack;
 
     public WashingProgram1(WashingIO io, ActorThread<WashingMessage> temp, ActorThread<WashingMessage> water,
             ActorThread<WashingMessage> spin) {
@@ -45,39 +46,30 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
 
             System.out.println("Filling with Water");
             water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
-             receive();
-            water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
             receive();
+
             System.out.println("setting SPIN_SLOW...");
             spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
             receive();
+
             System.out.println("Heating to 40");
             temp.send(new WashingMessage(this, WashingMessage.TEMP_SET, 40));
-            // Keep the temp for 30min
-            WashingMessage ackTempSet = receive();
+            receive();
+            // 30 min wait
 
             Thread.sleep(30 * 60000 / Settings.SPEEDUP);
-         //   spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
-         //   receive();
+
+            System.out.println("Turning off temp");
             temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
-           receive();
-         
+            receive();
 
             System.out.println("Now we drain");
-            
             water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
             receive();
-            water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
-            WashingMessage ackm= receive();
-             
-            System.out.println("we are done draining " + ackm);
-            
-            /*
+
             System.out.println("Rinsing");
             for (int i = 0; i < 5; i++) {
                 water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
-                 receive();
-                water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
                 receive();
                 spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
                 receive();
@@ -86,19 +78,21 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
                 receive();
                 water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
                 receive();
-
+                System.out.println(i);
             }
-            
-            
-            spin.send(new WashingMessage(this, WashingMessage.SPIN_FAST));
-            WashingMessage ackSpinFast = receive();
-            water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
-            ackDrain = receive();
-            Thread.sleep(5 * 60000 / Settings.SPEEDUP);
-            
-            */
+            /*
+             * 
+             * }
+             * 
+             * 
+             * spin.send(new WashingMessage(this, WashingMessage.SPIN_FAST)); WashingMessage
+             * ackSpinFast = receive(); water.send(new WashingMessage(this,
+             * WashingMessage.WATER_DRAIN)); ackDrain = receive(); Thread.sleep(5 * 60000 /
+             * Settings.SPEEDUP);
+             * 
+             */
 
-            io.lock(false);
+            // io.lock(false);
 
             System.out.println("washing program 1 finished");
         } catch (InterruptedException e) {

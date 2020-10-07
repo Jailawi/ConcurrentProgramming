@@ -38,8 +38,10 @@ public class SpinController extends ActorThread<WashingMessage> {
                 while (program != null) {
                     switch (program.getCommand()) {
                         case WashingMessage.SPIN_SLOW:
-                            sendAck();
-                            // System.out.println("got " + m);
+                            if (!spinOn) {
+                                sendAck();
+                                spinOn = true;
+                            }
                             while (true) {
                                 io.setSpinMode(SPIN_LEFT);
                                 program = receiveWithTimeout(60000 / Settings.SPEEDUP);
@@ -60,7 +62,11 @@ public class SpinController extends ActorThread<WashingMessage> {
                             break;
                         case WashingMessage.SPIN_OFF:
                             io.setSpinMode(1);
-                            sendAck();
+                            if (spinOn) {
+                                sendAck();
+                                spinOn = false;
+                            }
+
                             break;
                         default:
                             System.out.println("Invalid command try again");

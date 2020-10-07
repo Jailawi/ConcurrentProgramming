@@ -7,6 +7,7 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 	private WashingIO io;
 	private int dt = 10;
 	private WashingMessage program;
+	private boolean goalTempReached = false;
 
 	public TemperatureController(WashingIO io) {
 		this.io = io;
@@ -22,7 +23,7 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 		try {
 			while (true) {
 
-				WashingMessage m = receiveWithTimeout(dt * 1000 / Settings.SPEEDUP);
+				WashingMessage m = receiveWithTimeout(10000 / Settings.SPEEDUP);
 				if (m != null) {
 					program = m;
 				}
@@ -41,8 +42,9 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 							double lowerMargin = dt * 0.000238 * (currentTemp - 20) - 0.085;
 							double upperMargin = 0.478;
 
-							if (currentTemp + lowerMargin < tempWeWant - 2 && currentTemp + upperMargin > tempWeWant) {
+							if (currentTemp > tempWeWant - 2 && !goalTempReached) {
 								sendAck();
+								goalTempReached = true;
 							}
 
 							if (currentTemp + lowerMargin < tempWeWant - 2) {
