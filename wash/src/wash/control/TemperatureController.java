@@ -5,7 +5,7 @@ import wash.io.WashingIO;
 
 public class TemperatureController extends ActorThread<WashingMessage> {
 	private WashingIO io;
-	private int dt = 10000;
+	private int dt = 10;
 	private ActorThread<WashingMessage> program;
 
 	public TemperatureController(WashingIO io) {
@@ -19,7 +19,7 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 		try {
 			while (true) {
 
-				WashingMessage m = receiveWithTimeout(dt / Settings.SPEEDUP);
+				WashingMessage m = receiveWithTimeout(10000/ Settings.SPEEDUP);
 				if (m != null) {
 					// The thread that sent the message
 					program = m.getSender();
@@ -46,7 +46,7 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 						}
 					}
 					 default:
-                         System.out.println("Invalid command try again");
+                     //    System.out.println("Invalid command try again");
 
 					}
 				}
