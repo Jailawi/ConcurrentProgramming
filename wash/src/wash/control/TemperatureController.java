@@ -12,9 +12,6 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 		this.io = io;
 	}
 
-	private void sendAck() {
-		program.send(new WashingMessage(this, WashingMessage.ACKNOWLEDGMENT));
-	}
 
 	@Override
 	public void run() {
@@ -32,7 +29,6 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 					switch (m.getCommand()) {
 					case WashingMessage.TEMP_IDLE: {
 						io.heat(false);
-						sendAck();
 						break;
 					}
 
@@ -48,7 +44,6 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 							io.heat(false);
 							break;
 						}
-						sendAck();
 					}
 					 default:
                          System.out.println("Invalid command try again");
