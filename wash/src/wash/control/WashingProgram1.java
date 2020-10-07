@@ -45,39 +45,58 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
 
             System.out.println("Filling with Water");
             water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
-            WashingMessage ackWater = receive();
+             receive();
             water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
+            receive();
             System.out.println("setting SPIN_SLOW...");
             spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
+            receive();
             System.out.println("Heating to 40");
             temp.send(new WashingMessage(this, WashingMessage.TEMP_SET, 40));
-
             // Keep the temp for 30min
-            Thread.sleep(30 * 60000 / Settings.SPEEDUP);
             WashingMessage ackTempSet = receive();
-            temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
-            WashingMessage ackTempIdle = receive();
-            System.out.println("Now we drain");
-            water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
-            WashingMessage ackDrain = receive();
 
+            Thread.sleep(30 * 60000 / Settings.SPEEDUP);
+         //   spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
+         //   receive();
+            temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
+           receive();
+         
+
+            System.out.println("Now we drain");
+            
+            water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
+            receive();
+            water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
+            WashingMessage ackm= receive();
+             
+            System.out.println("we are done draining " + ackm);
+            
+            /*
             System.out.println("Rinsing");
             for (int i = 0; i < 5; i++) {
                 water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
-                WashingMessage ackRinse = receive();
+                 receive();
                 water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
+                receive();
                 spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
+                receive();
                 Thread.sleep(2 * 60000 / Settings.SPEEDUP);
+                spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
+                receive();
                 water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
-                ackDrain = receive();
+                receive();
 
             }
-
+            
+            
             spin.send(new WashingMessage(this, WashingMessage.SPIN_FAST));
             WashingMessage ackSpinFast = receive();
             water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
             ackDrain = receive();
             Thread.sleep(5 * 60000 / Settings.SPEEDUP);
+            
+            */
 
             io.lock(false);
 

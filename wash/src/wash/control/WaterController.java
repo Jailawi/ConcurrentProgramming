@@ -7,7 +7,7 @@ public class WaterController extends ActorThread<WashingMessage> {
 	private WashingIO io;
 	private int dt = 5000;
 
-	private ActorThread<WashingMessage> program;
+	private WashingMessage program;
 
     // TODO: add attributes
 
@@ -17,9 +17,8 @@ public class WaterController extends ActorThread<WashingMessage> {
     
 
 	private void sendAck() {
-		program.send(new WashingMessage(this, WashingMessage.ACKNOWLEDGMENT));
+		program.getSender().send(new WashingMessage(this, WashingMessage.ACKNOWLEDGMENT));
 	}
-
 
     @Override
     public void run() {
@@ -31,26 +30,28 @@ public class WaterController extends ActorThread<WashingMessage> {
     				WashingMessage m = receiveWithTimeout(dt / Settings.SPEEDUP);
     				if (m != null) {
     					// The thread that sent the message
-    					program = m.getSender();
+    					program = m;
     				}
     				
     				
-    				while(program != null) {
-    					switch (m.getCommand()) {
+    				if(program != null) {
+    					switch (program.getCommand()) {
 						case WashingMessage.WATER_DRAIN: {
-							if (io.getWaterLevel() == 0) {
-	                			io.drain(false);
-	                			sendAck();
-	                		}
-	                		else {
+							while (io.getWaterLevel() > 0) {
 	                			io.drain(true);
+		                		io.fill(false);
+
 	                		}
-	                		io.fill(false);
+	                		io.drain(false);
+	                		sendAck();
 	                		break;
+
+	                		}
 							
-						}
+						
 						case WashingMessage.WATER_FILL: {
-							if (io.getWaterLevel() < m.getValue()) {
+							if (io.getWaterLevel() < program.getValue()) {
+								io.drain(false);
 	                			io.fill(true);
 	                		}
 	                		else {
@@ -65,6 +66,7 @@ public class WaterController extends ActorThread<WashingMessage> {
 						case WashingMessage.WATER_IDLE: {
 							io.fill(false);
 	                		io.drain(false);
+	                		sendAck();
 	                		break;
 							
 						}

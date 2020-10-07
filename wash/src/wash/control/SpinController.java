@@ -12,14 +12,14 @@ public class SpinController extends ActorThread<WashingMessage> {
     private int SPIN_RIGHT = 3; // barrel rotating slowly, right
     private int SPIN_FAST = 4; // barrel rotating fast
     private boolean spinOn = false;
-    private ActorThread<WashingMessage> program;
+    private WashingMessage program;
 
     public SpinController(WashingIO io) {
         this.io = io;
     }
 
     private void sendAck() {
-        program.send(new WashingMessage(this, WashingMessage.ACKNOWLEDGMENT));
+        program.getSender().send(new WashingMessage(this, WashingMessage.ACKNOWLEDGMENT));
     }
 
     @Override
@@ -32,23 +32,23 @@ public class SpinController extends ActorThread<WashingMessage> {
                 // wait for up to a (simulated) minute for a WashingMessage
                 WashingMessage m = receiveWithTimeout(60000 / Settings.SPEEDUP);
                 if (m != null) {
-                    program = m.getSender();
+                    program = m;
                 }
                 // if m is null, it means a minute passed and no message was received
-                while (m != null) {
-                    switch (m.getCommand()) {
+                while (program != null) {
+                    switch (program.getCommand()) {
                         case WashingMessage.SPIN_SLOW:
                             sendAck();
                             // System.out.println("got " + m);
                             while (true) {
                                 io.setSpinMode(SPIN_LEFT);
-                                m = receiveWithTimeout(60000 / Settings.SPEEDUP);
-                                if (m != null && m.getCommand() != WashingMessage.SPIN_SLOW) {
+                                program = receiveWithTimeout(60000 / Settings.SPEEDUP);
+                                if (program != null && program.getCommand() != WashingMessage.SPIN_SLOW) {
                                     break;
                                 }
                                 io.setSpinMode(SPIN_RIGHT);
-                                m = receiveWithTimeout(60000 / Settings.SPEEDUP);
-                                if (m != null && m.getCommand() != WashingMessage.SPIN_SLOW) {
+                                program = receiveWithTimeout(60000 / Settings.SPEEDUP);
+                                if (program != null && program.getCommand() != WashingMessage.SPIN_SLOW) {
                                     break;
                                 }
                             }
