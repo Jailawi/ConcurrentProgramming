@@ -24,6 +24,7 @@ public class Wash {
             System.out.println("user selected program " + n);
             if (n == 0) {
                 program.interrupt();
+                program = null;
             }
             if (n == 1) {
                 program = new WashingProgram1(io, temp, water, spin);

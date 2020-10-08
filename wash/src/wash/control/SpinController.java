@@ -35,10 +35,10 @@ public class SpinController extends ActorThread<WashingMessage> {
                     program = m;
                 }
                 // if m is null, it means a minute passed and no message was received
-                while (program != null) {
+                if (program != null) {
                     switch (program.getCommand()) {
                         case WashingMessage.SPIN_SLOW:
-                            if (!spinOn) {
+                            if (spinOn == false) {
                                 sendAck();
                                 spinOn = true;
                             }
@@ -54,19 +54,20 @@ public class SpinController extends ActorThread<WashingMessage> {
                                     break;
                                 }
                             }
-
                             break;
                         case WashingMessage.SPIN_FAST:
-                            io.setSpinMode(SPIN_FAST);
-                            sendAck();
+                            if (spinOn == false) {
+                                spinOn = true;
+                                io.setSpinMode(SPIN_FAST);
+                                sendAck();
+                            }
                             break;
                         case WashingMessage.SPIN_OFF:
-                            io.setSpinMode(1);
                             if (spinOn) {
-                                sendAck();
+                                io.setSpinMode(SPIN_IDLE);
                                 spinOn = false;
+                                sendAck();
                             }
-
                             break;
                         default:
                             System.out.println("Invalid command try again");

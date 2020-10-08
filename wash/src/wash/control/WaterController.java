@@ -7,7 +7,8 @@ public class WaterController extends ActorThread<WashingMessage> {
 	private WashingIO io;
 	private int dt = 5000;
 	private double prevValue;
-
+	private boolean waterOn = false;
+	private boolean waterDrained = false;
 	private WashingMessage program;
 
 	// TODO: add attributes
@@ -34,51 +35,53 @@ public class WaterController extends ActorThread<WashingMessage> {
 
 				if (program != null) {
 					switch (program.getCommand()) {
-						case WashingMessage.WATER_DRAIN: {
+						case WashingMessage.WATER_DRAIN:
 							while (io.getWaterLevel() > 0) {
 								io.drain(true);
 								io.fill(false);
-
 							}
-							io.drain(false);
-							sendAck();
+							io.drain(true);
+							if (io.getWaterLevel() <= 0 && !waterDrained) {
+								waterDrained = true;
+								waterOn = false;
+								sendAck();
+							}
 							break;
 
-						}
-
-						case WashingMessage.WATER_FILL: {
-							if (io.getWaterLevel() < program.getValue()) {
+						case WashingMessage.WATER_FILL:
+							while (io.getWaterLevel() < program.getValue()) {
 								io.drain(false);
 								io.fill(true);
-							} else {
-								io.fill(false);
-								if (io.getWaterLevel() != prevValue) {
-									sendAck();
-								}
 							}
-							io.drain(false);
-							break;
-
-						}
-
-						case WashingMessage.WATER_IDLE: {
 							io.fill(false);
 							io.drain(false);
-							sendAck();
+							if (io.getWaterLevel() >= program.getValue() && !waterOn) {
+								waterOn = true;
+								waterDrained = false;
+								sendAck();
+							}
 							break;
 
-						}
+						case WashingMessage.WATER_IDLE:
+							if (waterOn) {
+								io.fill(false);
+								io.drain(false);
+								sendAck();
+								waterDrained = false;
+								waterOn = false;
+							}
+							break;
 
 						default:
 							System.out.println("Invalid command try again");
 
 					}
-					prevValue = io.getWaterLevel();
-
 				}
 
 			}
-		} catch (InterruptedException e) {
+		} catch (
+
+		InterruptedException e) {
 			// we don't expect this thread to be interrupted,
 			// so throw an error if it happens anyway
 			throw new Error();

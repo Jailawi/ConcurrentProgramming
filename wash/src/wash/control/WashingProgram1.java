@@ -40,7 +40,7 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
     @Override
     public void run() {
         try {
-            System.out.println("begin washingprogram1");
+            System.out.println("Color Wash Started");
             // Lock the hatch
             io.lock(true);
 
@@ -48,16 +48,23 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
             water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
             receive();
 
-            System.out.println("setting SPIN_SLOW...");
-            spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
+            water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
             receive();
 
             System.out.println("Heating to 40");
             temp.send(new WashingMessage(this, WashingMessage.TEMP_SET, 40));
             receive();
+
+            System.out.println("setting SPIN_SLOW...");
+            spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
+            receive();
+
             // 30 min wait
 
             Thread.sleep(30 * 60000 / Settings.SPEEDUP);
+
+            spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
+            receive();
 
             System.out.println("Turning off temp");
             temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
@@ -78,23 +85,19 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
                 receive();
                 water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
                 receive();
-                System.out.println(i);
             }
-            /*
-             * 
-             * }
-             * 
-             * 
-             * spin.send(new WashingMessage(this, WashingMessage.SPIN_FAST)); WashingMessage
-             * ackSpinFast = receive(); water.send(new WashingMessage(this,
-             * WashingMessage.WATER_DRAIN)); ackDrain = receive(); Thread.sleep(5 * 60000 /
-             * Settings.SPEEDUP);
-             * 
-             */
 
-            // io.lock(false);
+            System.out.println("Centrifuging");
+            spin.send(new WashingMessage(this, WashingMessage.SPIN_FAST));
+            receive();
+            Thread.sleep(5 * 60000 / Settings.SPEEDUP);
 
-            System.out.println("washing program 1 finished");
+            spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
+            receive();
+
+            io.lock(false);
+
+            System.out.println("Finished Color Wash");
         } catch (InterruptedException e) {
 
             // If we end up here, it means the program was interrupt()'ed:
