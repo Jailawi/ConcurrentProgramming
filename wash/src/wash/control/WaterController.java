@@ -35,7 +35,6 @@ public class WaterController extends ActorThread<WashingMessage> {
 				if (program != null) {
 					switch (program.getCommand()) {
 						case WashingMessage.WATER_DRAIN:
-							System.out.println("shako mako");
 							while (io.getWaterLevel() > 0) {
 								io.drain(true);
 								io.fill(false);

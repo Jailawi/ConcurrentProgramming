@@ -65,7 +65,7 @@ public class WashingProgram3 extends ActorThread<WashingMessage> {
             temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
             water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
             spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
-            System.out.println("washing program terminated");
+            System.out.println("Washing Program Terminated");
         }
     }
 }

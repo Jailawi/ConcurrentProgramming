@@ -55,7 +55,6 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 
 							if (currentTemp > tempWeWant - 2 && !goalTempReached) {
 								sendAck();
-								System.out.println("Sent ack");
 								goalTempReached = true;
 								tempOn = true;
 							}

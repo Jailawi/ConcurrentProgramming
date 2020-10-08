@@ -40,22 +40,20 @@ public class WashingProgram2 extends ActorThread<WashingMessage> {
     @Override
     public void run() {
         try {
-            System.out.println("Color Wash Started");
+            System.out.println("White Wash STARTED");
             // Lock the hatch
             io.lock(true);
 
-            System.out.println("Filling with Water");
+            System.out.println("Pre-Wash 40C");
             water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
             receive();
 
             water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
             receive();
 
-            System.out.println("Heating to 40");
             temp.send(new WashingMessage(this, WashingMessage.TEMP_SET, 40));
             receive();
 
-            System.out.println("Spin Mode Slow");
             spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
             receive();
 
@@ -72,6 +70,8 @@ public class WashingProgram2 extends ActorThread<WashingMessage> {
             water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
             receive();
 
+            System.out.println("Wash 60C");
+
             water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
             receive();
 
@@ -86,11 +86,9 @@ public class WashingProgram2 extends ActorThread<WashingMessage> {
             spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
             receive();
 
-            System.out.println("Temperature off");
             temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
             receive();
 
-            System.out.println("Draining");
             water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
             receive();
 
@@ -117,7 +115,7 @@ public class WashingProgram2 extends ActorThread<WashingMessage> {
 
             io.lock(false);
 
-            System.out.println("Finished Color Wash");
+            System.out.println("White Wash FINISHED");
         } catch (InterruptedException e) {
 
             // If we end up here, it means the program was interrupt()'ed:
