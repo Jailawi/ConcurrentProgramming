@@ -21,22 +21,26 @@ public class Wash {
 
         while (true) {
             int n = io.awaitButton();
-            System.out.println("user selected program " + n);
+
             if (n == 0) {
-                program.interrupt();
-                program = null;
+                if (program != null) {
+                    program.interrupt();
+                    program = null;
+                }
             }
             if (n == 1) {
                 program = new WashingProgram1(io, temp, water, spin);
                 program.start();
             }
-            // TODO if (n == 2) {
-
-            // }
+            if (n == 2) {
+                program = new WashingProgram2(io, temp, water, spin);
+                program.start();
+            }
 
             if (n == 3) {
                 program = new WashingProgram3(io, temp, water, spin);
                 program.start();
+
             }
 
         }

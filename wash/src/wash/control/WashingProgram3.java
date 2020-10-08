@@ -30,20 +30,18 @@ public class WashingProgram3 extends ActorThread<WashingMessage> {
     @Override
     public void run() {
         try {
-            System.out.println("washing program 3 started");
+            System.out.println("Draining STARTED");
 
             // Switch off heating
+            temp.send(new WashingMessage(this, WashingMessage.TEMP_SET, 8));
             temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
 
             // Wait for temperature controller to acknowledge
-            WashingMessage ack1 = receive();
-            System.out.println("got " + ack1);
-
+            receive();
             // Drain barrel, which may take some time. To ensure the barrel
             // is drained before we continue, an acknowledgment is required.
             water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
-            WashingMessage ack2 = receive(); // wait for acknowledgment
-            System.out.println("got " + ack2);
+            receive(); // wait for acknowledgment
 
             // Now that the barrel is drained, we can turn off water regulation.
             // For the WATER_IDLE order, the water level regulator will not send
@@ -53,13 +51,12 @@ public class WashingProgram3 extends ActorThread<WashingMessage> {
             // Switch off spin. We expect an acknowledgment, to ensure
             // the hatch isn't opened while the barrel is spinning.
             spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
-            WashingMessage ack3 = receive(); // wait for acknowledgment
-            System.out.println("got " + ack3);
+            receive(); // wait for acknowledgment
 
             // Unlock hatch
             io.lock(false);
 
-            System.out.println("washing program 3 finished");
+            System.out.println("Draining FINISHED");
         } catch (InterruptedException e) {
 
             // If we end up here, it means the program was interrupt()'ed:

@@ -12,7 +12,7 @@ import wash.io.WashingIO;
  * 
  * It can be used after an emergency stop (program 0) or a power failure.
  */
-public class WashingProgram1 extends ActorThread<WashingMessage> {
+public class WashingProgram2 extends ActorThread<WashingMessage> {
 
     private WashingIO io;
     private ActorThread<WashingMessage> temp;
@@ -20,7 +20,7 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
     private ActorThread<WashingMessage> spin;
     private WashingMessage ack;
 
-    public WashingProgram1(WashingIO io, ActorThread<WashingMessage> temp, ActorThread<WashingMessage> water,
+    public WashingProgram2(WashingIO io, ActorThread<WashingMessage> temp, ActorThread<WashingMessage> water,
             ActorThread<WashingMessage> spin) {
         this.io = io;
         this.temp = temp;
@@ -40,26 +40,28 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
     @Override
     public void run() {
         try {
-            System.out.println("Color Wash STARTED");
+            System.out.println("Color Wash Started");
             // Lock the hatch
             io.lock(true);
 
-            System.out.println("Washing");
+            System.out.println("Filling with Water");
             water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
             receive();
 
             water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
             receive();
 
+            System.out.println("Heating to 40");
             temp.send(new WashingMessage(this, WashingMessage.TEMP_SET, 40));
             receive();
 
+            System.out.println("Spin Mode Slow");
             spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
             receive();
 
-            // 30 min wait
+            // 20 min wait
 
-            Thread.sleep(30 * 60000 / Settings.SPEEDUP);
+            Thread.sleep(20 * 60000 / Settings.SPEEDUP);
 
             spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
             receive();
@@ -67,6 +69,28 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
             temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
             receive();
 
+            water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
+            receive();
+
+            water.send(new WashingMessage(this, WashingMessage.WATER_FILL, 10));
+            receive();
+
+            temp.send(new WashingMessage(this, WashingMessage.TEMP_SET, 60));
+            receive();
+
+            spin.send(new WashingMessage(this, WashingMessage.SPIN_SLOW));
+            receive();
+
+            Thread.sleep(30 * 60000 / Settings.SPEEDUP);
+
+            spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
+            receive();
+
+            System.out.println("Temperature off");
+            temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
+            receive();
+
+            System.out.println("Draining");
             water.send(new WashingMessage(this, WashingMessage.WATER_DRAIN));
             receive();
 
@@ -93,7 +117,7 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
 
             io.lock(false);
 
-            System.out.println("Color Wash FINISHED");
+            System.out.println("Finished Color Wash");
         } catch (InterruptedException e) {
 
             // If we end up here, it means the program was interrupt()'ed:
@@ -102,7 +126,7 @@ public class WashingProgram1 extends ActorThread<WashingMessage> {
             temp.send(new WashingMessage(this, WashingMessage.TEMP_IDLE));
             water.send(new WashingMessage(this, WashingMessage.WATER_IDLE));
             spin.send(new WashingMessage(this, WashingMessage.SPIN_OFF));
-            System.out.println("washing program terminated");
+            System.out.println("Washing Program Terminated");
         }
     }
 }

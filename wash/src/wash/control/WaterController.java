@@ -6,7 +6,6 @@ import wash.io.WashingIO;
 public class WaterController extends ActorThread<WashingMessage> {
 	private WashingIO io;
 	private int dt = 5000;
-	private double prevValue;
 	private boolean waterOn = false;
 	private boolean waterDrained = false;
 	private WashingMessage program;
@@ -36,6 +35,7 @@ public class WaterController extends ActorThread<WashingMessage> {
 				if (program != null) {
 					switch (program.getCommand()) {
 						case WashingMessage.WATER_DRAIN:
+							System.out.println("shako mako");
 							while (io.getWaterLevel() > 0) {
 								io.drain(true);
 								io.fill(false);
@@ -52,6 +52,7 @@ public class WaterController extends ActorThread<WashingMessage> {
 							while (io.getWaterLevel() < program.getValue()) {
 								io.drain(false);
 								io.fill(true);
+								waterDrained = false;
 							}
 							io.fill(false);
 							io.drain(false);

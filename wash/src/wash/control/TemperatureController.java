@@ -33,6 +33,7 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 					switch (program.getCommand()) {
 						case WashingMessage.TEMP_IDLE:
 							if (tempOn) {
+								goalTempReached = false;
 								io.heat(false);
 								sendAck();
 								tempOn = false;
@@ -43,17 +44,25 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 						case WashingMessage.TEMP_SET:
 							double tempWeWant = program.getValue();
 							double currentTemp = io.getTemperature();
-							double lowerMargin = dt * 0.000238 * (currentTemp - 20) - 0.085;
+							double lowerMargin;
+							if (tempWeWant == 60) {
+								lowerMargin = dt * 0.000238 * (currentTemp - 20) - 0.2;
+							} else {
+								lowerMargin = dt * 0.000238 * (currentTemp - 20) - 0.085; // - 0.1; // 0.085;
+							}
+
 							double upperMargin = 0.478;
 
 							if (currentTemp > tempWeWant - 2 && !goalTempReached) {
 								sendAck();
+								System.out.println("Sent ack");
 								goalTempReached = true;
 								tempOn = true;
 							}
 
 							if (currentTemp + lowerMargin < tempWeWant - 2) {
 								io.heat(true);
+								tempOn = true;
 
 							} else if (currentTemp + upperMargin > tempWeWant) {
 								io.heat(false);
@@ -67,8 +76,7 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 			}
 
 		} catch (InterruptedException e) {
-			// we don't expect this thread to be interrupted,
-			// so throw an error if it happens anyway
+
 			throw new Error();
 
 		}
