@@ -1,7 +1,5 @@
 package wash.control;
 
-import java.util.Set;
-
 import actor.ActorThread;
 import wash.io.WashingIO;
 
