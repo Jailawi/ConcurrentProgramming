@@ -1,2 +1,2 @@
-# ConcurrentProgramming
-Concurrent Programming with Java
+# Concurrent Programming
+Labs from University course Concurrent Programming with Java. 
