@@ -38,20 +38,13 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 								sendAck();
 								tempOn = false;
 							}
-
 							break;
 
 						case WashingMessage.TEMP_SET:
 							double tempWeWant = program.getValue();
 							double currentTemp = io.getTemperature();
-							double lowerMargin;
-							if (tempWeWant == 60) {
-								lowerMargin = dt * 0.000238 * (currentTemp - 20) - 0.2;
-							} else {
-								lowerMargin = dt * 0.000238 * (currentTemp - 20) - 0.085; // - 0.1; // 0.085;
-							}
-
-							double upperMargin = 0.478;
+							double lowerMargin = dt * 0.000238 * (currentTemp - 20) + 0.2;
+							double upperMargin = 0.7;
 
 							if (currentTemp > tempWeWant - 2 && !goalTempReached) {
 								sendAck();
@@ -59,7 +52,7 @@ public class TemperatureController extends ActorThread<WashingMessage> {
 								tempOn = true;
 							}
 
-							if (currentTemp + lowerMargin < tempWeWant - 2) {
+							if (currentTemp - lowerMargin < tempWeWant - 2) {
 								io.heat(true);
 								tempOn = true;
 
